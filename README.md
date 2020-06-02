@@ -2,6 +2,8 @@
 greenpass开放平台 API
 GreenPass Api接口文档
 
+GreenPass Api接口文档
+
 概述
 欢迎使用GreenPass API！ 你可以使用此 API 得到亦来云DID账号，管理自己的健康数据（体温、试剂检测、位置变更或者应用自定义的健康数据类型），获取健康状态。
 名词解释
@@ -67,7 +69,7 @@ tenantId	int	租户id
     return result;
     }
     
- ###   
+ ##### 请求参数示例  
     Map<String, String> param = new HashMap<>();
     param.put("timestamp", String.valueOf(System.currentTimeMillis()));
     param.put("tenantId", tenantId);
@@ -76,10 +78,10 @@ tenantId	int	租户id
     param.put("pageSize", String.valueOf(size));
     param.put("sign", sign(param, secret));
 
- ###
+ #####
  
- 返回格式:
-无数据返回:Demo如下
+ #### 返回格式
+ ##### 无数据返回:Demo如下
 
     {
     "code":10006,
@@ -88,7 +90,7 @@ tenantId	int	租户id
     "success":false
     }
 
-有数据返回: Demo如下
+ ##### 有数据返回: Demo如下
 
     {
     "code":0,
@@ -130,11 +132,416 @@ data|	Object|	响应结果.
  #### 附
 授权码申请地址:
 
-授权码申请邮箱地址: ==contact@mygreenpass.life==
+授权码申请邮箱地址: contact@mygreenpass.life
 
 注意:
 授权码是您接入GreenPass的唯一凭证, 请务必保存好您的授权码,同时请务必向第三方透露您的授权码.当GreenPass检测到您的恶意非法操作时,GreenPass有权停止对您的服务,并保留诉讼的权利.
 
 如果您已经拿到了自己的授权码,现在可以开始尝试接入GreenPass了.调试工具推荐使用PostMan API Client,这里是下载地址: https://www.postman.com/product/api-client/
 下面开始接入吧!
+
+ #### 创建您的did
+
+说明:
+接入GreenPass的所有数据需要一个did来作为存储或者取出的唯一标识,通过此接口您将获取到您的did
+
+
+请求地址:
+
+	/third/1.0/user/thirdAppCreate.do
+	
+请求方式:
+	POST
+请求参数:
+	
+	
+ 参数名 |	类型 |	是否必填 |	说明
+ ---  |  --- |  --- |  ---
+userId | 	string |是  | 	第三地方应用用户id
+
+
+请求范例:
+	
+
+响应参数:
+	
+    {
+    "code":0,
+    "success":true,
+    "msg":"Succeed",
+    "data":"iXgvjQp5DZZMnqXXXXXXXXXXXXXXXXXXXX",
+    "map":{}
+    }
+
+
+
+ #### 获取用户信息
+
+说明:
+	根据did获取用户信息
+	
+请求地址:
+
+	/third/1.0/user/userInfo.json
+	
+请求方式:
+		POST
+请求参数:
+	
+	
+ 参数名 |	类型 |	是否必填 |	说明
+ ---  |  --- |  --- |  ---
+userDid | 	String | 	是 | 	用户的did
+
+
+请求范例:
+	
+	
+
+响应参数:
+
+    {
+    "code":0,
+    "success":true,
+    "msg":"Succeed",
+    "data":{
+        "uid":3XX,
+        "account":"1_1000",
+        "nickName":null,
+        "gender":null,
+        "email":null,
+        "idCard":null,
+        "json":null,
+        "name":null,
+        "profilePhoto":null,
+        "totalScore":20,
+        "status":"enabled",
+        "temperatureType":null,
+        "parkIds":null,
+        "parkId":null,
+        "did":"iXgvjQp5DZZMnqXXXXXXXXXXXXXXXXXXX"
+    },
+    "map":{}
+    }
+
+
+
+
+
+ #### 保存健康信息
+
+说明:
+	记录健康信息
+	
+请求地址:
+
+	/third/1.0/health/save.do
+	
+请求方式:
+		POST
+		
+请求参数:
+	
+ 参数名 |	类型 |	是否必填 |	说明
+ ---  |  --- |  --- |  ---
+type | 	Int	 | 是  | 打卡类型(1:体温打卡2:试剂检测3:位置打卡4:其他打卡)
+detail | 	String |是  | 	数据内容
+userDid	 | String | 是 | 	用户的did
+temperatureType(可选) | 	String | 否 | 	温度类型(C:摄氏度F:华氏度)
+authenticatorType | 	Int | 是 | 	数据提交类型
+evidenceImage(可选)	 | String	 | 否 | 证明图片
+location(可选) | 	String | 否  | 	位置
+address(可选) | 	String |  否 | 	位置
+mapType(可选) | 	Int	 |  否 | 地图类型
+latitude(可选) | 	BigDecimal	 |   否| 经度
+longitude(可选) | 	BigDecimal |   否| 	纬度
+
+ ##### 说明:
+当打卡类型为体温打卡时,温度类型必须要有.当打卡类型为试剂检测时,证明图片必须要有.当打卡类型为位置打卡时,地图类型要和经纬度必须要有
+	
+
+请求范例:
+
+响应参数:
+
+        {
+    "code":0,
+    "success":true,
+    "msg":"Succeed",
+    "data":{
+        "id":8XX,
+        "createTime":1590112952909,
+        "updateTime":null,
+        "deleted":false,
+        "weight":null,
+        "version":null,
+        "tenantId":1,
+        "json":null,
+        "authenticatorType":1,
+        "mapType":null,
+        "status":1,
+        "type":1,
+        "type1":null,
+        "authenticator":"iXgvjQp5DZZMnqXXXXXXXXXXXXXXXXXXXX",
+        "coordinates":null,
+        "detail":"36.6",
+        "evidenceImage":null,
+        "didHash":null,
+        "hash":null,
+        "eidHash":null,
+        "latitude":null,
+        "location":null,
+        "address":null,
+        "longitude":null,
+        "userId":3XX,
+        "remarks":null,
+        "parkName":null
+    },
+    "map":{}
+    }
+
+
+
+ #### 获取我的健康记录历史记录
+
+说明:
+
+获取我的健康记录历史记录
+	
+请求地址:
+
+	/third/1.0/health/page.json
+	
+请求方式:	POST
+	
+请求参数:
+	
+	
+ 参数名 |	类型 |	是否必填 |	说明
+ ---  |  --- |  --- |  ---
+pageNum |	Long |是	 |页码	
+pageSize |	Long | 否| 	每页条数，默认是10
+userDid |	String | 是|	用户的did	
+
+请求范例:
+
+响应参数:
+
+    {
+    "code":0,
+    "success":true,
+    "msg":"Succeed",
+    "data":{
+        "list":[
+            {
+                "id":8XX,
+                "createTime":1590112952000,
+                "updateTime":null,
+                "deleted":false,
+                "weight":null,
+                "version":null,
+                "tenantId":1,
+                "json":null,
+                "authenticatorType":1,
+                "mapType":null,
+                "status":1,
+                "type":1,
+                "type1":null,
+                "authenticator":null,
+                "coordinates":null,
+                "detail":"36.6",
+                "evidenceImage":null,
+                "didHash":null,
+                "hash":null,
+                "eidHash":null,
+                "latitude":null,
+                "location":null,
+                "address":null,
+                "longitude":null,
+                "userId":337,
+                "remarks":null,
+                "parkName":null
+            }
+        ],
+        "paras":{
+            "id":null,
+            "createTime":1588867200000,
+            "updateTime":null,
+            "deleted":null,
+            "weight":null,
+            "version":null,
+            "tenantId":1,
+            "json":null,
+            "authenticatorType":null,
+            "mapType":null,
+            "status":null,
+            "type":null,
+            "type1":2,
+            "authenticator":null,
+            "coordinates":null,
+            "detail":null,
+            "evidenceImage":null,
+            "didHash":null,
+            "hash":null,
+            "eidHash":null,
+            "latitude":null,
+            "location":null,
+            "address":null,
+            "longitude":null,
+            "userId":3XX,
+            "remarks":null,
+            "parkName":null
+        },
+        "orderBy":null,
+        "pageNumber":1,
+        "pageSize":10,
+        "totalPage":1,
+        "totalRow":1,
+        "lastPage":true,
+        "firstPage":true
+    },
+    "map":{}
+    }
+
+
+
+ #### 获取我的健康记录历史记录
+
+说明:
+
+	获取我的健康记录历史记录
+	
+请求地址:
+
+	/third/1.0/health/trail.json
+	
+请求方式:
+	GET
+	
+请求参数:
+ 参数名 |	类型 |	是否必填 |	说明
+ ---  |  --- |  --- |  ---
+userDid	 | String |是  | 	用户的did
+
+请求范例:
+
+
+响应参数:
+
+    {
+    "code":0,
+    "success":true,
+    "msg":"Succeed",
+    "data":[
+        {
+            "lng":"3x.2xxxx91016",
+            "lat":"1xx.5xxxx42944"
+        },
+        {
+            "lng":"3x.2xxxx91016",
+            "lat":"1xx.5xxxx42944"
+        },
+        {
+            "lng":"3x.2xxxx91016",
+            "lat":"1xx.5xxxx42944"
+        },
+        {
+            "lng":"3x.2xxxx91016",
+            "lat":"1xx.5xxxx42944"
+        },
+        {
+            "lng":"3x.2xxxx91016",
+            "lat":"1xx.5xxxx42944"
+        },
+        {
+            "lng":"3x.2xxxx91016",
+            "lat":"1xx.5xxxx42944"
+        },
+        {
+            "lng":"3x.2xxxx91016",
+            "lat":"1xx.5xxxx42944"
+        }
+    ],
+    "map":{}
+     }
+     
+
+
+
+  #### 获取我的最后一条健康记录
+ 
+ 说明:
+	获取我的最后一条健康记录
+请求地址:
+
+	/third/1.0/health/findByNowDay.json
+	
+ 请求方式:
+	POST
+	
+请求参数:
+ 参数名 |	类型 |	是否必填 |	说明
+ ---  |  --- |  --- |  ---
+userDid	|String	|是|用户的did
+
+请求范例:
+
+
+响应参数:
+
+    {
+    "code":0,
+    "success":true,
+    "msg":"Succeed",
+    "data":{
+        "id":8XX,
+        "createTime":1590118456000,
+        "updateTime":null,
+        "deleted":false,
+        "weight":null,
+        "version":null,
+        "tenantId":1,
+        "json":"",
+        "authenticatorType":1,
+        "mapType":1,
+        "status":1,
+        "type":1,
+        "type1":null,
+        "authenticator":null,
+        "coordinates":"",
+        "detail":"36.6",
+        "evidenceImage":"",
+        "didHash":null,
+        "hash":null,
+        "eidHash":null,
+        "latitude":null,
+        "location":"",
+        "address":"",
+        "longitude":null,
+        "userId":XX,
+        "remarks":null,
+        "parkName":null
+    },
+    "map":{}
+    }
+    
+
+
+
+ #### 错误码说明
+
+
+错误码   |	说明
+---  |  ---
+10006 | 网络繁忙
+10007 | 参数异常
+10005 | 请求超时
+10008 | 签名不匹配
+10002 | 系统参数错误
+10001 | 参数错误
+20001 | 未授权
+20005 | 用户不存在
+20009 | 授权错误
+20005 | 用户不存在
+
 
