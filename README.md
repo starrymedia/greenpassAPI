@@ -1,36 +1,41 @@
 # greenpassAPI
-greenpass开放平台 API
 GreenPass Api接口文档
 
-GreenPass Api接口文档
+[TOC]
 
-概述
+ ### 概述
+ 
 欢迎使用GreenPass API！ 你可以使用此 API 得到亦来云DID账号，管理自己的健康数据（体温、试剂检测、位置变更或者应用自定义的健康数据类型），获取健康状态。
-名词解释
+ ### 名词解释
 名称	说明
 did	如无特别说明本文所提及的did均指的是Elastos Did
 
-统一说明
+ #### 统一说明
 
-系统域名
+ ##### 系统域名
+ 
 测试系统域名:https://greenpass.starrymedia.com:4433
 正式系统域名:
 
-参数说明:
+ ##### 参数说明:
 一次请求的发起,应当包含公共请求参数和具体接口的业务参数,其中公共请求参数是必须的要传递的.业务请求参数应当根据具体的接口来进行传递
 
 公共请求参数:
-名称	类型	说明
-timestamp	string	时间戳
-sign	string	签名
-tenantId	int	租户id
+
+名称 | 类型 | 说明
+---|---|---
+timestamp|	string|	时间戳
+sign|	string	|签名
+tenantId|	int	|租户id
 
 备注:
 
-签名生成方案:
+ ##### 签名生成方案:
+ 
 将业务参数按照一定的排序规则进行排序,将排序之后的结果结合应用授权码使用AES加密,即可得到相应的签名
 
 排序规则:
+
 按照字段名的ASCII码从小到大排序
 
     public   String sign(Map<String, String> map, String secret) {
@@ -78,10 +83,10 @@ tenantId	int	租户id
     param.put("pageSize", String.valueOf(size));
     param.put("sign", sign(param, secret));
 
- #####
  
  #### 返回格式
- ##### 无数据返回:Demo如下
+ ##### 无数据返回
+ Demo如下
 
     {
     "code":10006,
@@ -90,7 +95,8 @@ tenantId	int	租户id
     "success":false
     }
 
- ##### 有数据返回: Demo如下
+ ##### 有数据返回
+ Demo如下
 
     {
     "code":0,
@@ -256,7 +262,8 @@ mapType(可选) | 	Int	 |  否 | 地图类型
 latitude(可选) | 	BigDecimal	 |   否| 经度
 longitude(可选) | 	BigDecimal |   否| 	纬度
 
- ##### 说明:
+说明:
+
 当打卡类型为体温打卡时,温度类型必须要有.当打卡类型为试剂检测时,证明图片必须要有.当打卡类型为位置打卡时,地图类型要和经纬度必须要有
 	
 
@@ -449,18 +456,6 @@ userDid	 | String |是  | 	用户的did
             "lng":"3x.2xxxx91016",
             "lat":"1xx.5xxxx42944"
         },
-        {
-            "lng":"3x.2xxxx91016",
-            "lat":"1xx.5xxxx42944"
-        },
-        {
-            "lng":"3x.2xxxx91016",
-            "lat":"1xx.5xxxx42944"
-        },
-        {
-            "lng":"3x.2xxxx91016",
-            "lat":"1xx.5xxxx42944"
-        }
     ],
     "map":{}
      }
@@ -531,17 +526,15 @@ userDid	|String	|是|用户的did
  #### 错误码说明
 
 
-错误码   |	说明
----  |  ---
-10006 | 网络繁忙
-10007 | 参数异常
-10005 | 请求超时
-10008 | 签名不匹配
-10002 | 系统参数错误
-10001 | 参数错误
-20001 | 未授权
-20005 | 用户不存在
-20009 | 授权错误
-20005 | 用户不存在
-
-
+    错误码   |	说明
+    ---  |  ---
+    10006 | 网络繁忙
+    10007 | 参数异常
+    10005 | 请求超时
+    10008 | 签名不匹配
+    10002 | 系统参数错误
+    10001 | 参数错误
+    20001 | 未授权
+    20005 | 用户不存在
+    20009 | 授权错误
+    20005 | 用户不存在
