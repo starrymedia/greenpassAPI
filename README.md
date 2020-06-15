@@ -8,7 +8,7 @@ GreenPass Api接口文档
 欢迎使用GreenPass API！ 你可以使用此 API 得到亦来云DID账号，管理自己的健康数据（体温、试剂检测、位置变更或者应用自定义的健康数据类型），获取健康状态。
  ### 名词解释
 名称	说明
-did	如无特别说明本文所提及的did均指的是Elastos Did
+did	如无特别说明本文所提及的did均指的是ElastosDID
 
  #### 统一说明
 
@@ -29,7 +29,8 @@ did	如无特别说明本文所提及的did均指的是Elastos Did
 授权码申请邮箱地址: contact@mygreenpass.life
 
 注意:
-授权码是您接入GreenPass的唯一凭证, 请务必保存好您的授权码,同时请务必向第三方透露您的授权码.当GreenPass检测到您的恶意非法操作时,GreenPass有权停止对您的服务,并保留诉讼的权利.
+授权码是您接入GreenPass的唯一凭证, 请务必保存好您的授权码,同时请务必不要向第三方透露您的授权码.
+当GreenPass检测到您的恶意非法操作时,GreenPass有权停止对您的服务,并保留诉讼的权利.
 
 如果您已经拿到了自己的授权码,现在可以开始尝试接入GreenPass了.调试工具推荐使用PostMan API Client,这里是下载地址: https://www.postman.com/product/api-client/
 下面开始接入吧!
