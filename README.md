@@ -9,7 +9,7 @@ GreenPass Api接口文档
  ### 名词解释
 名称   |		说明
 ---  |  ---
-did	如无特别说明本文所提及的did均指的是Elastos DID
+did |		如无特别说明本文所提及的did均指的是Elastos DID
 
  #### 统一说明
 
