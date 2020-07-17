@@ -1,92 +1,89 @@
-# GreenPassAPI
-GreenPass Open API Documentation
+# greenpassAPI
+GreenPass Api接口文档
 
  [TOC] 
 
- ### Overview
+ ### 概述
  
-Welcome to use GreenPass Open API! You can use APIs to create Elastos DID, manage your own health data, such as body temperature, test result, location, or more typrs of health related data), and obtain your overall health status QR code.
-
- ### Terms
-
-Name | Description
+欢迎使用GreenPass API！ 你可以使用此 API 得到亦来云DID账号，管理自己的健康数据（体温、试剂检测、位置变更或者应用自定义的健康数据类型），获取健康状态。
+ ### 名词解释
+名称   |		说明
 ---  |  ---
-DID	| If there is no special note, the DID refers to Elastos DID by default.
+did |		如无特别说明本文所提及的did均指的是Elastos DID
 
- #### General note
+ #### 统一说明
 
- ##### Domain name
+ ##### 系统域名
  
-Test domain name: https://greenpass.starrymedia.com:4433
+测试系统域名:https://greenpass.starrymedia.com:4433
+正式系统域名:
 
-Production domain name:
 
+ ### 接入说明
 
- ### Access note
+ #### 准备工作:
+首先您需要申请测试环境的授码和租户id,只有拥有了合法的授权码,您才可以对接我们的服务.参照相关文档进行对接测试即可.当您所需要的操作均已在测试环境调试通过时,只需要将请求的地址切换到我们提供的正式环境,同时将授权码更换为正式的授权码即可访问我们的服务.
 
- #### Preparation:
-First, you need to apply for the authorization code and tenant ID for the test environment. With the authorization code, you can start to use your API service, and test based on documents. Once all tests are passed in test environment, you can switch the address to our production environment, and use the authorization code to access to API service in production environment. 
+ #### 附
+授权码申请地址:
 
- #### Note
-Method to apply for authorization code:
+授权码申请邮箱地址: contact@mygreenpass.life
 
-Please send request to this email address: contact@mygreenpass.life
+注意:
+授权码是您接入GreenPass的唯一凭证, 请务必保存好您的授权码,同时请务必不要向第三方透露您的授权码.
+当GreenPass检测到您的恶意非法操作时,GreenPass有权停止对您的服务,并保留诉讼的权利.
 
-Attention:
-Authorization code is the only ID for your connect to GreenPass service. Please keep in the safe place. If GreenPass detects the illegal access from your ID, GreenPass will suspend your access, and reserve the rights for further actions.
+如果您已经拿到了自己的授权码,现在可以开始尝试接入GreenPass了.调试工具推荐使用PostMan API Client,这里是下载地址: https://www.postman.com/product/api-client/
+下面开始接入吧!
 
-If you already have the authorization code, you can try to access GreenPass service now. We recommend you use PostMan API Client as debug tool. Here is the download address: https://www.postman.com/product/api-client/
+#### 错误码说明
 
-Let's get started!
-
-#### Error codes
-
-Error code   |	Description
+错误码   |	说明
 ---  |  ---
-10006 | Network busy
-10007 | Parameter error
-10005 | Request time out
-10008 | Signature mismatch
-10002 | System parameter error
-10001 | Parameter error
-20001 | Not authorized
-20005 | User not exist
-20009 | Authorization error
-20005 | User not exist
+ 10006 | 网络繁忙
+ 10007 | 参数异常
+10005 | 请求超时
+ 10008 | 签名不匹配
+10002 | 系统参数错误
+10001 | 参数错误
+20001 | 未授权
+20005 | 用户不存在
+20009 | 授权错误
+20005 | 用户不存在
 
- ##### Parameters:
-A request includes both public parameters and specific service parameters. The public paramters are required. The service parameters depend on the details service interface. 
+ ##### 参数说明:
+一次请求的发起,应当包含公共请求参数和具体接口的业务参数,其中公共请求参数是必须的要传递的.业务请求参数应当根据具体的接口来进行传递
 
-Public request parameters:
+公共请求参数:
 
-Name | Type | Description
+名称 | 类型 | 说明
 ---|---|---
-timestamp|	string|	time stamp
-sign|	string	| signature
-tenantId|	int	| tenant id
+timestamp|	string|	时间戳
+sign|	string	|签名
+tenantId|	int	|租户id
 
-Note:
+备注:
 
- ##### Signature generation:
+ ##### 签名生成方案:
  
-The service parameters are listed in the certain sorting order rule, and then combine with the authorization code and be encrypted via AES encryption to generate the digital signature.
+将业务参数按照一定的排序规则进行排序,将排序之后的结果结合应用授权码使用AES加密,即可得到相应的签名
 
-Sorting order rule:
+排序规则:
 
-Sort strings by ASCII code from small to large
+按照字段名的ASCII码从小到大排序
 
     public   String sign(Map<String, String> map, String secret) {
 
      String result = "";
     try {
         List<Map.Entry<String, String>> infoIds = new ArrayList<Map.Entry<String, String>>(map.entrySet());
-        //sort the input parameters by ASCII code, small to large  (by disctionary)
+        //对所有传入参数按照字段名的 ASCII 码从小到大排序（字典序）
         infoIds.sort(new Comparator<Map.Entry<String, String>>() {
             public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2) {
                 return (o1.getKey()).compareTo(o2.getKey());
             }
         });
-        // construct signature key format
+        // 构造签名键值对的格式
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> item : infoIds) {
             if (item.getKey() != null || item.getKey() != "") {
@@ -99,10 +96,10 @@ Sort strings by ASCII code from small to large
                 }
             }
         }
-        //delete the end &
+        //删除结尾&
         sb.deleteCharAt(sb.length() - 1);
 
-        //signature
+        //签名
         result = HMACSHA256.sha256_HMAC(sb.toString(), secret);
 
     } catch (Exception e) {
@@ -111,7 +108,7 @@ Sort strings by ASCII code from small to large
     return result;
     }
     
- ##### request parameters example  
+ ##### 请求参数示例  
     Map<String, String> param = new HashMap<>();
     param.put("timestamp", String.valueOf(System.currentTimeMillis()));
     param.put("tenantId", tenantId);
@@ -121,9 +118,9 @@ Sort strings by ASCII code from small to large
     param.put("sign", sign(param, secret));
 
  
- #### Return format
- ##### No return data
- Demo code:
+ #### 返回格式
+ ##### 无数据返回
+ Demo如下
 
     {
     "code":10006,
@@ -132,8 +129,8 @@ Sort strings by ASCII code from small to large
     "success":false
     }
 
- ##### With return data
- Demo code:
+ ##### 有数据返回
+ Demo如下
 
     {
     "code":0,
@@ -152,44 +149,44 @@ Sort strings by ASCII code from small to large
     "map":{}
     }
 
- #### Parameter description: 
+ #### 字段说明: 
  
 
 
-NAme | Type | Description
+名称 | 类型 | 说明
 ---|---|---
-code|	Int	| return status code
-success| 	Boolean	| return result
-msg	| String	| return message
-map	| JSONObject|	reserved
-data|	Object|	response result
+code|	Int	| 返回状态码
+success| 	Boolean	|返回结果
+msg	| String	|返回信息
+map	| JSONObject|	预留字段
+data|	Object|	响应结果.
 
 
 
- #### Create your DID
+ #### 创建您的did
 
-Note:
-All data connected to GreenPass needs a DID as a unique identifier for storage or retrieval. Through this interface you will get your did
+说明:
+接入GreenPass的所有数据需要一个did来作为存储或者取出的唯一标识,通过此接口您将获取到您的did
 
 
-Request Address:
+请求地址:
+
 	/third/1.0/user/thirdAppCreate.do
 	
-Request Method:
+请求方式:
 	POST
+请求参数:
 	
-Request Parameters:
 	
-	
-Name |	Type |	Required  |	Description
+ 参数名 |	类型 |	是否必填 |	说明
  ---  |  --- |  --- |  ---
-userId | 	string | Yes  | User id	from Third-place application 
+userId | 	string |是  | 	第三地方应用用户id
 
 
-Request Example:
+请求范例:
 	
 
-Response parameters:
+响应参数:
 	
     {
     "code":0,
@@ -201,48 +198,48 @@ Response parameters:
 
 
 
- #### Save health information
+ #### 获取用户信息
 
-Note:
-	Get user information
+说明:
+	根据did获取用户信息
 	
-Request address:
+请求地址:
 
 	/third/1.0/user/userInfo.json
 	
-Request method:
+请求方式:
 		POST
-		
-Request parameters:
+请求参数:
 	
 	
-Name |	Type |	Required  |	Description
+ 参数名 |	类型 |	是否必填 |	说明
  ---  |  --- |  --- |  ---
-userDid | 	String |  Yes  | User id
+userDid | 	String | 	是 | 	用户的did
 
 
-Request example:
+请求范例:
+	
 	
 
-Response parameters:
+响应参数:
 
     {
     "code":0,
     "success":true,
     "msg":"Succeed",
     "data":{
-        "uid":3XX,//user Id
-        "account":"x_xxxx",//user account 
+        "uid":3XX,//用户Id
+        "account":"x_xxxx",//用户账号
         "nickName":null,//nick_name
-        "gender":null,//gender
-        "email":null,//email 
+        "gender":null,//性别
+        "email":null,//邮箱
         "idCard":null,
         "json":null,
-        "name":null,//name
+        "name":null,//名称
         "profilePhoto":null,
         "totalScore":20,
-        "status":"enabled",//status
-        "temperatureType":null,temperature type
+        "status":"enabled",//状态
+        "temperatureType":null,温度类型
         "parkIds":null,
         "parkId":null,
         "did":"iXgvjQp5DZZMnqXXXXXXXXXXXXXXXXXXX"//did
@@ -254,41 +251,42 @@ Response parameters:
 
 
 
- #### Save health information
+ #### 保存健康信息
 
-Note:
-	Record health information
+说明:
+	记录健康信息
 	
-Request address:
+请求地址:
 
 	/third/1.0/health/save.do
 	
-Request method:
+请求方式:
 		POST
 		
-Request parameters:
+请求参数:
 	
-Name |	Type |	Required  |	Description
+ 参数名 |	类型 |	是否必填 |	说明
  ---  |  --- |  --- |  ---
-type | 	Int	 | Yes | Type (1: temperature check 2: reagent detection 3: position check 4: other check)
-detail | 	String | Yes | 	Detailed content
-userDid	 | String | Yes | 	User DID
-temperatureType(Optional) | 	String | No | 	Temperature type (C: Celsius F: Fahrenheit)
-authenticatorType | 	Int | Yes | 	Data submission type
-evidenceImage(Optional)	 | String	 | No | Picture
-location(Optional) | 	String | No | Location
-address(Optional) | 	String |  No | 	Location
-mapType(Optional) | 	Int	 |  No | Map type
-latitude(Optional) | 	BigDecimal	 | No | latitude
-longitude(Optional) | 	BigDecimal | No| longitude
+type | 	Int	 | 是  | 打卡类型(1:体温打卡2:试剂检测3:位置打卡4:其他打卡)
+detail | 	String |是  | 	数据内容
+userDid	 | String | 是 | 	用户的did
+temperatureType(可选) | 	String | 否 | 	温度类型(C:摄氏度F:华氏度)
+authenticatorType | 	Int | 是 | 	数据提交类型
+evidenceImage(可选)	 | String	 | 否 | 证明图片
+location(可选) | 	String | 否  | 	位置
+address(可选) | 	String |  否 | 	位置
+mapType(可选) | 	Int	 |  否 | 地图类型
+latitude(可选) | 	BigDecimal	 |   否| 经度
+longitude(可选) | 	BigDecimal |   否| 	纬度
 
-Note:
-When submitting body temperature, the temperature is required. When submitting reagent testing, the proof image is required. When submitting location , the map type、latitude and longitude are required.
+说明:
+
+当打卡类型为体温打卡时,温度类型必须要有.当打卡类型为试剂检测时,证明图片必须要有.当打卡类型为位置打卡时,地图类型要和经纬度必须要有
 	
 
-Request example:
+请求范例:
 
-Response parameters:
+响应参数:
 
         {
     "code":0,
@@ -301,57 +299,57 @@ Response parameters:
         "deleted":false,
         "weight":null,
         "version":null,
-        "tenantId":xxxxxxx,//tenant id
+        "tenantId":xxxxxxx,//租户id
         "json":null,
         "authenticatorType":1,//
         "mapType":null,
-        "status":1,//health status
-        "type":1,//type
+        "status":1,//健康状态
+        "type":1,//打卡类型
         "type1":null,
-        "authenticator":"iXgvjQp5DZZMnqXXXXXXXXXXXXXXXXXXXX",//witness or subimtter did
+        "authenticator":"iXgvjQp5DZZMnqXXXXXXXXXXXXXXXXXXXX",//证明人did
         "coordinates":null,
-        "detail":"36.6",//details
-        "evidenceImage":null,//image to inprove
+        "detail":"36.6",//详情
+        "evidenceImage":null,//图片证明
         "didHash":null,
         "hash":null,
         "eidHash":null,
         "latitude":null,
-        "location":null,//location
-        "address":null,//adderess
+        "location":null,//位置
+        "address":null,//地址
         "longitude":null,
-        "userId":3XX,//user Id
-        "remarks":null,//note
-        "parkName":null//organization name
+        "userId":3XX,//用户Id
+        "remarks":null,/备注
+        "parkName":null//组织名称
     },
     "map":{}
     }
 
 
 
- #### Get my health history
+ #### 获取我的健康记录历史记录
 
-Note:
+说明:
 
-Get my health history
+获取我的健康记录历史记录
 	
-Request address:
+请求地址:
 
 	/third/1.0/health/page.json
 	
-Request method:	POST
+请求方式:	POST
 	
-Request parameters:
+请求参数:
 	
 	
-Name |	Type |	Required  |	Description
+ 参数名 |	类型 |	是否必填 |	说明
  ---  |  --- |  --- |  ---
-pageNum |	Long | Yes | Page Number
-pageSize |	Long |No | The items number per page, default is 10
-userDid |	String |Yes | User's did	
+pageNum |	Long |是	 |页码	
+pageSize |	Long | 否| 	每页条数，默认是10
+userDid |	String | 是|	用户的did	
 
-Request example:
+请求范例:
 
-Response parameters:
+响应参数:
 
     {
     "code":0,
@@ -431,28 +429,28 @@ Response parameters:
 
 
 
- #### Get my health history
+ #### 获取我的健康记录历史记录
 
-Note:
+说明:
 
-	Get my health history
+	获取我的健康记录历史记录
 	
-Request address:
+请求地址:
 
 	/third/1.0/health/trail.json
 	
-Request method:
+请求方式:
 	GET
 	
-Request parameters:
-Name |	Type |	Required  |	Description
+请求参数:
+ 参数名 |	类型 |	是否必填 |	说明
  ---  |  --- |  --- |  ---
-userDid	 | String |Yes  | 	User did
+userDid	 | String |是  | 	用户的did
 
-Request example:
+请求范例:
 
 
-Response parameters:
+响应参数:
 
     {
     "code":0,
@@ -460,8 +458,8 @@ Response parameters:
     "msg":"Succeed",
     "data":[
         {
-            "lng":"3x.2xxxx91016",//longitude
-            "lat":"1xx.5xxxx42944"//latitude
+            "lng":"3x.2xxxx91016",//维度
+            "lat":"1xx.5xxxx42944"//经度
         },
         {
             "lng":"3x.2xxxx91016",
@@ -482,27 +480,26 @@ Response parameters:
 
 
 
-  #### Get my last health record
+  #### 获取我的最后一条健康记录
  
- Note:
-	Get my last health record
-	
-Request address:
+ 说明:
+	获取我的最后一条健康记录
+请求地址:
 
 	/third/1.0/health/findByNowDay.json
 	
- Request method:
+ 请求方式:
 	POST
 	
-Request parameters:
-Name |	Type |	Required  |	Description
+请求参数:
+ 参数名 |	类型 |	是否必填 |	说明
  ---  |  --- |  --- |  ---
-userDid	|String	|Yes| User did
+userDid	|String	|是|用户的did
 
-Request example:
+请求范例:
 
 
-Response parameters:
+响应参数:
 
     {
     "code":0,
@@ -517,14 +514,14 @@ Response parameters:
         "version":null,
         "tenantId":xxxxx,
         "json":"",
-        "authenticatorType":1,//type
-        "mapType":1,//map type
-        "status":1,//status
-        "type":1,//type
+        "authenticatorType":1,//打卡类型
+        "mapType":1,//地图类型
+        "status":1,//状态
+        "type":1,//打卡类型
         "type1":null,
         "authenticator":null,
         "coordinates":"",
-        "detail":"36.6",//temperature
+        "detail":"36.6",//温度
         "evidenceImage":"",
         "didHash":null,
         "hash":null,
@@ -533,46 +530,46 @@ Response parameters:
         "location":"",
         "address":"",
         "longitude":null,
-        "userId":XX,//user Id
-        "remarks":null,//note
-        "parkName":null//location name
+        "userId":XX,//用户Id
+        "remarks":null,/?备注
+        "parkName":null//位置名称
     },
     "map":{}
     }
     
- #### Scan the location code to save the location record
+ #### 用户扫描地点码保存通行记录
   
- Note:
+ 说明:
  
-    Scan the the location QR code  to save the user's location record at the location
+    扫描地点二维码,保存用户在该地点的通行记录
     
- Request address:
+ 请求地址:
  
     /third/1.0/verify/accessLog.json
  	
- Request method:
+ 请求方式:
  
     POST 
  	
- Request parameters:
+ 请求参数:
  
- Name |	Type |	Required  |	Description
+ 参数名|   类型| 是否必填|   说明
  ---|   ---|    ---|    ---
-tenantId|integer|Yes|Tenant id
-userDid|String|Yes|User did
-location|String|Yes|location
-coordinates|String|Yes|coordinates
-parkId|Long|Yes|location id
-locationName|String|Yes|location name
-healthStatus|Integer|Yes|Health status((1."Healthy"), (2."Unhealthy"), (3."Not tested yet");)
-mapType|Integer|Yes|Map type (1.Baidu map;2.Google map;3.Gaode map;4.Tencent map)
-type|Integer|Yes|type (1.temperature 2.reagent detection 3.location  4.others)
-detail|String|Yes|details (Temperature, negative or positive, area)
+tenantId|integer|是|租户id
+userDid|String|是|用户did
+location|String|是|位置
+coordinates|String|是|坐标
+parkId|Long|是|地点id
+locationName|String|是|地点名称
+healthStatus|Integer|是|健康状态((1,"Healthy"), (2,"Unhealthy"), (3, "Not tested yet");)
+mapType|Integer|是|地图类型(1:百度地图;2:谷歌地图;3:高德地图;4:腾讯地图)
+type|Integer|是|打卡类型(1:体温打卡2:试剂检测3:位置打卡4:其他打卡)
+detail|String|是|打卡详情(温度、阴性阳性、地区)
  
- Request example:
+ 请求范例:
  
  
- Response parameters:
+ 响应参数:
  
     {
      "code": 0,
@@ -583,87 +580,87 @@ detail|String|Yes|details (Temperature, negative or positive, area)
     }
  
  
- #### Scan to access
+ #### 扫码通行
    
-  Note:
+  说明:
   
-     Scan the user's QR code or reservation code to save the access record.
+     扫描用户二维码或者预约码保存通行记录.
      
-  Request address:
+  请求地址:
   
      /third/1.0/verify/save.do
   	
-  Request method:
+  请求方式:
   
      POST 
   	
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-userDid|String|Yes|Scan code to verify user did
-did|String|No|user ID
-appointmentId|Long|No|Reservation id for web reservation
-tenantId|integer|Yes|Tenant id
-location|String|No|location
-coordinates|String|No|coordinates
-mapType|Integer|No|Map type (1.Baidu map;2.Google map;3.Gaode map;4.Tencent map)
-isThird|Boolean|No|YesNoSubmit for others
+userDid|String|是|扫码验证用户did
+did|String|否|普通应用内预约用户did(被验证的用户did)
+appointmentId|Long|否|网页预约的预约id
+tenantId|integer|是|租户id
+location|String|否|位置
+coordinates|String|否|坐标
+mapType|Integer|否|地图类型(1:百度地图;2:谷歌地图;3:高德地图;4:腾讯地图)
+isThird|Boolean|否|是否为帮其他人打卡
 
   
-  Request example:
+  请求范例:
   
   
-  Response parameters:
+  响应参数:
   
       {
           "code": 0,
           "success": true,
           "msg": "Succeed",
           "data": {
-              "msg": "Test Negative_No temperature in last 24 hours",//conclusion
-              "verifierType": 4,//type
-              "tenantName": "Demo",//tenant name 
-              "healthStatus": 3,//health status
+              "msg": "Test Negative_No temperature in last 24 hours",//结论
+              "verifierType": 4,//打卡类型
+              "tenantName": "Demo",//租户名称
+              "healthStatus": 3,//健康状态
               "createTime": 1591597122713,
-              "companyName": "Alex club",
-              "tenantId": xxxxxxx,//tenant id
-              "name": "q",//name
+              "companyName": "鲜鲜测试位置",
+              "tenantId": xxxxxxx,//租户id
+              "name": "q",//名词
               "did": "imothunWhDWxxxxxxxxxx4GZKthJc9d6uS"//did
           },
           "map": {}
       }
   
     
- #### Access record
+ #### 通行记录
        
-  Note:
+  说明:
   
-     Get the history of user verification
+     获取用户验证通行的历史记录
      
-  Request address:
+  请求地址:
   
      /third/1.0/verify/page.json
     
-  Request method:
+  请求方式:
   
      POST 
     
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-userDid|String|Yes|Scan code to verify user did
-pageNum|Long|Yes|Current page number
-pageSize|Long|Yes|Number
-startTimeLong|Long|No|Start-time stamp
-endTimeLong|Long|No|End-time stamp
+userDid|String|是|扫码验证用户did
+pageNum|Long|是|当前页码
+pageSize|Long|是|条数
+startTimeLong|Long|否|起始时间时间戳
+endTimeLong|Long|否|结束日期时间戳
 
   
-  Request example:
+  请求范例:
   
   
-  Response parameters:
+  响应参数:
   
       {
           "code": 0,
@@ -673,24 +670,24 @@ endTimeLong|Long|No|End-time stamp
               "list": [
                   {
                       "id": 324,//id
-                      "createTime": 1591597122000,//time of creation
-                      "updateTime": null,//update time
-                      "deleted": false,//delete
+                      "createTime": 1591597122000,//创建时间
+                      "updateTime": null,//更新时间
+                      "deleted": false,//删除标志
                       "weight": null,
                       "version": null,
-                      "tenantId":xxxxxxx,//tenant id
+                      "tenantId":xxxxxxx,//租户id
                       "json": null,
-                      "healthStatus": 3,//health status 
-                      "mapType": null,//map type
-                      "appointmentId": null,//appoinment id
-                      "parkId": null,//organization id
-                      "authenticatorId": 72,//Validator id
-                      "coordinates": null,//coordinates
-                      "describe": "Alex club",//description
-                      "healthLogId": null,//health log id
-                      "location": null,//location 
-                      "verifierId": 330,//verified Id
-                      "verifierType": "4",//verified type
+                      "healthStatus": 3,//健康状态
+                      "mapType": null,//地图类型
+                      "appointmentId": null,//预约id
+                      "parkId": null,//组织id
+                      "authenticatorId": 72,//验证者id
+                      "coordinates": null,//坐标
+                      "describe": "鲜鲜测试位置",//描述
+                      "healthLogId": null,//健康日志id
+                      "location": null,//位置
+                      "verifierId": 330,//被验证Id
+                      "verifierType": "4",//被验证类型
                       "verifyDate": 1591597123000,
                       "authIds": null,
                       "startTime": null,
@@ -698,16 +695,16 @@ endTimeLong|Long|No|End-time stamp
                       "startTimeLong": null,
                       "endTimeLong": null,
                       "parkIdsSet": null,
-                      "authenticatorName": "barney",//Validator name
-                      "verifierName": "q",//Verified name
+                      "authenticatorName": "哈哈哈哈哈哈",//验证者名称
+                      "verifierName": "q",//被验证者名称
                       "healthLogType": null,
                       "healthLogStatus": null,
                       "healthLogDetail": null,
                       "appointmentLocation": null,
                       "parkName": null,
                       "appointmentDescribe": null,
-                      "tenantName": "Demo",//tenant name 
-                      "pname": "bubbling-well shop"//loaction name
+                      "tenantName": "Demo",//租户名称
+                      "pname": "鲜鲜测试位置"//位置名称
                   },
                   ...
                        {
@@ -738,7 +735,7 @@ endTimeLong|Long|No|End-time stamp
                       "endTimeLong": null,
                       "parkIdsSet": null,
                       "authenticatorName": null,
-                      "verifierName": "barney",
+                      "verifierName": "哈哈哈哈哈哈",
                       "healthLogType": 3,
                       "healthLogStatus": null,
                       "healthLogDetail": "",
@@ -794,39 +791,39 @@ endTimeLong|Long|No|End-time stamp
       }
   
   
-  ### Organization related   
-#### Create Location (Organization)
-Note:
+  ### 组织相关    
+#### 创建地点(组织)
+说明:
   
-     Create a new location or organization
+     创建一处新的地点或者组织
      
-  Request address:
+  请求地址:
   
     /third/1.0/park/create.do
     
-  Request method:
+  请求方式:
   
      POST 
     
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-userDid|String|Yes|user did
-name|String|Yes|Name
-location|String|Yes|Location
-mapType|Integer|No|Map type (map type. 1: Baidu map; 2: Google map; 3: Gaode map; 4: Tencent map)
-coordinates|String|Yes|Coordinates
-receptionists|String|No|did:["did","did","did"]
-logo|String|No|address of location logo 
-photo|String|No|address of location picture 
-info|String|No|Organization Introduction
-isPublic|integer|Yes|YesNo public location
-isPublicLocation|integer|Yes|YesNo shows detailed location
+  userDid|String|是|用户did
+name|String|是|名称
+location|String|是|位置
+mapType|Integer|否|地图类型(地图类型。1:百度地图;2:谷歌地图;3:高德地图;4:腾讯地图)
+coordinates|String|是|坐标
+receptionists|String|否|接待者did:["did","did","did"]
+logo|String|否|组织logo地址
+photo|String|否|组织图片地址
+info|String|否|组织介绍
+isPublic|integer|是|是否公开地点
+isPublicLocation|integer|是|是否显示详细位置
 
   
-  Request example:
-  Response parameters:
+  请求范例:
+  响应参数:
         
         {
             "code": 0,
@@ -837,35 +834,35 @@ isPublicLocation|integer|Yes|YesNo shows detailed location
         }
     
         
-####  Edit location (organization)
-Note:
+####  编辑地点(组织)
+说明:
 
-    Through this interface, you can edit and modify the organization or location you created
+    通过此接口,您可以编辑修改您创建的组织或者地点
 
-Request address:
+请求地址:
 
      /third/1.0/park/edit.do
 
-Request method:
+请求方式:
 
     POST
         
-Request parameters:
+请求参数:
 
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-userDid|String|Yes|user did
-id|Long|Yes|Organization id
-name|String|Yes|Organization name
-isPublic|integer|Yes|YesNo public location
-isPublicLocation|integer|Yes|YesNo shows detailed location
-location|String|Yes|Organization location
-mapType|integer|Yes|Map type
-coordinates|String|Yes|Coordinates
-receptionists|String|No|did:["did","did","did"]
+  userDid|String|是|用户did
+  id|Long|是|组织id
+  name|String|是|组织名称
+  isPublic|integer|是|是否公开地点
+  isPublicLocation|integer|是|是否显示详细位置
+  location|String|是|组织位置
+  mapType|integer|是|地图类型
+  coordinates|String|是|坐标
+  receptionists|String|否|接待者did:["did","did","did"]
   
-Request example:
-Response parameters: 
+请求范例:
+响应参数: 
 
     {
         "code": 0,
@@ -875,28 +872,28 @@ Response parameters:
         "map": {}
     }
 
-####  Delete location (organization)
-Note:
+####  删除地点(组织)
+说明:
 
-    Through this interface, you can delete the organization or place you created, all information related to this place will be unavailable
+    通过此接口,您可以删除您创建的组织或者地点,所有跟此地点相关的信息都将不可用
 
-Request address:
+请求地址:
 
      POST /third/1.0/park/del.do
 
-Request method:
+请求方式:
 
     POST
         
-Request parameters:
+请求参数:
 
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-  userDid|String|Yes|User did
-  parkId|Long|Yes|Organization id
+  userDid|String|是|用户did
+  parkId|Long|是|组织id
   
-Request example:
-Response parameters: 
+请求范例:
+响应参数: 
 
     {
         "code": 0,
@@ -907,28 +904,28 @@ Response parameters:
     }
 
      
-  ####  Query details of organization information
-  Note:
+  ####  查询组织信息详情
+  说明:
   
-      Through this interface, you can query the information of the organization or location you created
+      通过此接口,您可以查询您创建创建的组织或者地点的信息
   
-  Request address:
+  请求地址:
   
        /third/1.0/park/findById.json
   
-  Request method:
+  请求方式:
   
       POST
           
-  Request parameters:
+  请求参数:
   
-    Name |	Type |	Required  |	Description
+    参数名|   类型| 是否必填|   说明
     ---|   ---|    ---|    ---
-    userDid|String|Yes|User did
-    id|Long|Yes|Organization id
+    userDid|String|是|用户did
+    id|Long|是|组织id
     
-  Request example:
-  Response parameters: 
+  请求范例:
+  响应参数: 
   
       {
           "code": 0,
@@ -941,21 +938,21 @@ Response parameters:
               "deleted": false,
               "weight": null,
               "version": null,
-              "tenantId": xxxxxx,//tenantid
+              "tenantId": xxxxxx,//租户id
               "json": null,
-              "mapType": 2,//map type
-              "coordinates": "31.204008122876772,121.599235291026",//coordinates
-              "location": "Shanghai",//location
-              "name": "Cathy",//name
-              "areaCode": "000086",// area code
-              "userId": 330,//userId
-              "logo": null,//location logo
-              "photo": null,//location picture
-              "info": null,//information
-              "phone": null,//telephone
-              "isPublic": 1,//YesNo public location
-              "isPublicLocation": 1,//YesNo detailed location
-              "receptionists": null,//receptionists
+              "mapType": 2,//地图类型
+              "coordinates": "31.204008122876772,121.599235291026",//坐标
+              "location": "上海",//地点
+              "name": "鱼子酱",//名称
+              "areaCode": "000086",//区域编码
+              "userId": 330,//用户Id
+              "logo": null,//地点logo
+              "photo": null,//地点图片
+              "info": null,//信息
+              "phone": null,//电话
+              "isPublic": 1,//是否公开地点
+              "isPublicLocation": 1,//是否显示详细位置
+              "receptionists": null,//接待者
               "isAdmin": 0,//
               "haveAppointment": false,
               "role": null,
@@ -967,30 +964,30 @@ Response parameters:
       }  
         
         
-  ####  Get list of organization administrators
-Note:
+  ####  获取组织管理员列表
+说明:
 
-    Through this interface, you can get the list of administrators of the specified organization
+    通过此接口,您可以获取指定组织的管理员列表
 
-Request address:
+请求地址:
 
     /third/1.0/park/page.json
 
-Request method:
+请求方式:
 
     POST
         
-Request parameters:
+请求参数:
 
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-  userDid|String|Yes|User did
-  pageNum|Long|Yes|Page number 
-  pageSize|Long|Yes|Items number
+  userDid|String|是|用户did
+  pageNum|Long|是|页码
+  pageSize|Long|是|条数
   
   
-Request example:
-Response parameters: 
+请求范例:
+响应参数: 
 
     {
         "code": 0,
@@ -1007,23 +1004,23 @@ Response parameters:
                     "version": null,
                     "tenantId": 1,
                     "json": null,
-                    "mapType": 2,/map type
-                    "coordinates": "31.204008122876772,121.599235291026",//coordinates
-                    "location": "Shanghai",//location
-                    "name": "Cathy",//name
-                    "areaCode": "000086",//area code
-                    "userId": 330,//userID
+                    "mapType": 2,/地图类型
+                    "coordinates": "31.204008122876772,121.599235291026",//坐标
+                    "location": "上海",//位置
+                    "name": "鱼子酱",//名称
+                    "areaCode": "000086",//区域编码
+                    "userId": 330,//用户ID
                     "logo": null,
                     "photo": null,
                     "info": null,
                     "phone": null,
-                    "isPublic": 1,//YesNopubliclocation
-                    "isPublicLocation": 1,//YesNo show detailed location
+                    "isPublic": 1,//是否公开地点
+                    "isPublicLocation": 1,//是否显示详细位置
                     "receptionists": null,
-                    "isAdmin": 1,//YesNoYes administrator
+                    "isAdmin": 1,//是否是管理员
                     "haveAppointment": false,
                     "role": [
-                        3//role
+                        3//角色
                     ],
                     "provinceId": null,
                     "province": null,
@@ -1040,7 +1037,7 @@ Response parameters:
                     "json": null,
                     "mapType": 2,
                     "coordinates": "31.204001177379357,121.59918527668138",
-                    "location": "Shanghaijinke road 11",
+                    "location": "上海市浦东新区博霞路11",
                     "name": "hhhhhh",
                     "areaCode": "000086",
                     "userId": 330,
@@ -1052,8 +1049,8 @@ Response parameters:
                     "isPublicLocation": 0,
                     "receptionists": [
                         {
-                            "uid": 330,//receptionistsyonhuid
-                            "account": "zsxxxxxxn@163.com",// account
+                            "uid": 330,//接待者yonhuid
+                            "account": "zsxxxxxxn@163.com",//账户
                             "nickName": "q",//nick_name
                             "gender": null,
                             "email": "zsuxxxn@163.com",
@@ -1061,8 +1058,8 @@ Response parameters:
                             "json": null,
                             "name": null,
                             "profilePhoto": null,
-                            "totalScore": 82,//points
-                            "status": "enabled",// status
+                            "totalScore": 82,//分
+                            "status": "enabled",//状态
                             "temperatureType": null,
                             "parkIds": null,
                             "parkId": null,
@@ -1101,28 +1098,28 @@ Response parameters:
  
      
      
-####  According to the user DID get all the organization-related information under the user
-Note:
+####  根据用户did获取该用户下所有的组织相关信息
+说明:
 
-   Through this interface, you can get the list of administrators of the specified organization
+    通过此接口,您可以获取指定组织的管理员列表
 
-Request address:
+请求地址:
 
        /third/1.0/park/parkInfo.json   
 
-Request method:
+请求方式:
 
     POST
         
-Request parameters:
+请求参数:
 
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-  userDid|String|Yes|User did
+  userDid|String|是|用户did
 
   
-Request example:
-Response parameters:
+请求范例:
+响应参数:
  
         {
             "code": 0,
@@ -1136,20 +1133,20 @@ Response parameters:
                     "deleted": false,
                     "weight": null,
                     "version": null,
-                    "tenantId": xxxxxX,// tenantid
+                    "tenantId": xxxxxX,//租户id
                     "json": null,
-                    "mapType": 2,//map type
-                    "coordinates": "31.0769472,121.5958393",//coordinates
-                    "location": "Shanghai jinke road ",//address
-                    "name": "鲜鲜测试location",//name
-                    "areaCode": "000086",//area code
-                    "userId": 72,//userid
-                    "logo": "url",//picture address
-                    "photo": null,//picture address
+                    "mapType": 2,//地图类型
+                    "coordinates": "31.0769472,121.5958393",//坐标
+                    "location": "上海市浦东新区航头镇鹤恒路鹤沙航城东茗苑",//地址
+                    "name": "鲜鲜测试位置",//名称
+                    "areaCode": "000086",//区域编码
+                    "userId": 72,//用户id
+                    "logo": "url",//图片的地址
+                    "photo": null,//图片地址
                     "info": null,
                     "phone": null,
-                    "isPublic": 0,//YesNopubliclocation
-                    "isPublicLocation": 0//YesNo show detailed location
+                    "isPublic": 0,//是否公开地点
+                    "isPublicLocation": 0//是否显示详细位置
                 },
                 {
                     "id": 82,
@@ -1162,7 +1159,7 @@ Response parameters:
                     "json": null,
                     "mapType": 2,
                     "coordinates": "31.204001177379357,121.59918527668138",
-                    "location": "Shanghai Jinke Road11",
+                    "location": "上海市浦东新区博霞路11",
                     "name": "hhhhhh",
                     "areaCode": "000086",
                     "userId": 330,
@@ -1170,37 +1167,37 @@ Response parameters:
                     "photo": "",
                     "info": "test",
                     "phone": null,
-                    "isPublic": 1,//YesNopubliclocation
-                    "isPublicLocation": 0//YesNo show detailed location
+                    "isPublic": 1,//是否公开地点
+                    "isPublicLocation": 0//是否显示详细位置
                 }
             ],
             "map": {}
         }
            
   
-####  Fuzzy query organization
-Note:
+####  模糊查询组织
+说明:
 
-    Through this interface, you can enter any content for fuzzy query organization
+    通过此接口,您可以输入任意内容模糊查询组织
 
-Request address:
+请求地址:
 
        /third/1.0/park/searchName.do
 
-Request method:
+请求方式:
 
     POST
         
-Request parameters:
+请求参数:
 
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-  userDid|String|Yes|User did
-  name|String|Yes|Organization name
+  userDid|String|是|用户did
+  name|String|是|组织名称
 
   
-Request example:
-Response parameters:
+请求范例:
+响应参数:
  
          {
              "code": 0,
@@ -1220,9 +1217,9 @@ Response parameters:
                      "coordinates": "31.20638902179997,121.5948918226798",
                      "location": "Zuchongzhi Road, Pudong",
                      "name": "Lizard Design Studio",
-                     "areaCode": "000086",//area code
-                     "userId": 80,//userid
-                     "logo": "url",//logoaddress
+                     "areaCode": "000086",//区域编码
+                     "userId": 80,//用户id
+                     "logo": "url",//logo地址
                      "photo": null,
                      "info": null,
                      "phone": null,
@@ -1234,29 +1231,29 @@ Response parameters:
          }     
         
        
-####  Verify organization name
-Note:
+####  校验组织名称
+说明:
 
-    Through this interface, you can verify that the organization name YesNo already exists
+    通过此接口,您可以校验组织名称是否已经存在
 
-Request address:
+请求地址:
 
      /third/1.0/park/verifyName.do
 
-Request method:
+请求方式:
 
     POST
         
-Request parameters:
+请求参数:
 
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-  userDid|String|Yes|User did
-  name|String|Yes|Organization name
+  userDid|String|是|用户did
+  name|String|是|组织名称
 
   
-Request example:
-Response parameters:
+请求范例:
+响应参数:
  
      {
        "code": 0,
@@ -1267,30 +1264,30 @@ Response parameters:
      }
     
           
- #### Staff  management
-#### Add staffs
-Note:
+ ###人员管理
+#### 添加员工
+说明:
     
-    Through this interface, you can add members (staffs) to the organization (location) you created
+    通过此接口,您可以为自己创建的组织(企业)添加成员(员工)
 
-Request address:
+请求地址:
 
     /third/1.0/employee/add.do
 
-Request method:
+请求方式:
 
     POST 
-Request parameters:
+请求参数:
 
-Name |	Type |	Required  |	Description
+参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-userDid|String|Yes|user did
-parkId|Long|Yes|Organization id
-did|String|Yes|member did to add
-lang|String|No|Language parameters
+  userDid|String|是|用户did
+  parkId|Long|是|组织id
+  did|String|是|要添加的成员did
+  lang|String|否|语言参数
       
-Request example:
-Response parameters:
+请求示例:
+响应参数:
  
     {
         "code": 0,
@@ -1301,31 +1298,31 @@ Response parameters:
     }
  
  
-#### Edit staff
-Note:
+#### 编辑员工
+说明:
     
-    Through this interface, you can edit the staffs you added
+    通过此接口,您可以编辑自己添加的员工
 
-Request address:
+请求地址:
 
     /third/1.0/employee/edit.do
 
-Request method:
+请求方式:
 
     POST 
-Request parameters:
+请求参数:
 
-Name |	Type |	Required  |	Description
+参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-userDid|String|Yes|user did
-parkId|Long|Yes|Organization id
-id|Long|Yes|member id to be modified
-lang|String|No|Language parameters
-email|String|No|Mailbox
-id|Long|Yes|Employee id
+  userDid|String|是|用户did
+  parkId|Long|是|组织id
+  id|Long|是|要修改的成员id
+  lang|String|否|语言参数
+  email|String|否|邮箱
+  id|Long|是|员工id
       
-Request example:
-Response parameters:
+请求示例:
+响应参数:
  
     {
         "code": 0,
@@ -1336,27 +1333,27 @@ Response parameters:
     }
  
  
-#### Delete staff
-Note:
+#### 删除员工
+说明:
     
-    Through this interface, you can remove the staffs (members) you added
+    通过此接口,您可以移除自己添加的员工(成员)
 
-Request address:
+请求地址:
 
     /third/1.0/employee/delete.do
 
-Request method:
+请求方式:
 
     POST 
-Request parameters:
+请求参数:
 
-Name |	Type |	Required  |	Description
+参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-  userDid|String|Yes|User did
-  id|Long|Yes|Staff id
+  userDid|String|是|用户did
+  id|Long|是|员工id
       
-Request example:
-Response parameters:
+请求示例:
+响应参数:
  
     {
         "code": 0,
@@ -1367,84 +1364,84 @@ Response parameters:
     }
   
 
-#### Query employee information based on staff ID
-Note:
+#### 根据员工Id查询员工信息
+说明:
     
-    Through this interface, you can query the information of the added staffs (members)
+    通过此接口,您可以查询己添加的员工(成员)信息
 
-Request address:
+请求地址:
 
     /third/1.0/employee/findById.json
 
-Request method:
+请求方式:
 
     POST 
-Request parameters:
+请求参数:
 
-Name |	Type |	Required  |	Description
+参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-  userDid|String|Yes|User did
-  id|Long|Yes|Staff id
+  userDid|String|是|用户did
+  id|Long|是|员工id
       
-Request example:
-Response parameters:
+请求示例:
+响应参数:
  
     {
         "code": 0,
         "success": true,
         "msg": "Succeed",
         "data": {
-            "id": 105,//member ID
+            "id": 105,//员工ID
             "createTime": 1591611094000,
             "updateTime": 1591612132000,
             "deleted": false,
             "weight": null,
             "version": null,
-            "tenantId": Xxxxxx,// tenantid
+            "tenantId": Xxxxxx,//租户id
             "json": null,
-            "gender": null,//gender
+            "gender": null,//性别
             "companyId": null,
             "employNo": null,
             "did": "iYQnfPtnLn8J4xxxxxxxxP3rs8SZf",//did
             "mobile": null,
             "email": null,
-            "name": " David",
+            "name": "小杨6",
             "organizeId": null,
-            "parkId": 83,// Organizationid
+            "parkId": 83,//组织id
             "genderSwitch": null,
             "healthStatus": null,
             "isAdmin": null,
             "companyName": null,
-            "parkName": "Cathy"// Organizationname
+            "parkName": "鱼子酱"//组织名称
         },
         "map": {}
     }
  
 
 
-#### According to the list of members under the organization
-Note:
+#### 根据组织下员工列表
+说明:
     
-    Through this interface, you can query all members under the specified organization id
+    通过此接口,您可以查询指定组织id下的所有成员
 
-Request address:
+请求地址:
 
     /third/1.0/employee/page.json
 
-Request method:
+请求方式:
 
     POST 
-Request parameters:
+请求参数:
 
-Name |	Type |	Required  |	Description
+参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-userDid|String|Yes|user did
-parkId|Long|Yes|user did
-pageNum|Long|Yes|Current page
-pageSize|Long|Yes|Items Number
+  userDid|String|是|用户did
+  parkId|Long|是|用户did
+  pageNum|Long|是|当前页
+  pageSize|Long|是|条数
       
-Request example:
-Response parameters:
+请求示例:
+响应参数:
  
     {
         "code": 0,
@@ -1459,7 +1456,7 @@ Response parameters:
                     "deleted": false,
                     "weight": null,
                     "version": null,
-                    "tenantId": xxxxxxx,// tenantid
+                    "tenantId": xxxxxxx,//租户id
                     "json": null,
                     "gender": null,
                     "companyId": null,
@@ -1467,15 +1464,15 @@ Response parameters:
                     "did": "iYQnfPtnLn8J4kxxxxxxxxFUP3rs8SZf",//did
                     "mobile": null,
                     "email": null,
-                    "name": " David",
+                    "name": "小杨6",
                     "organizeId": null,
-                    "parkId": 83,// Organizationid
+                    "parkId": 83,//组织id
                     "genderSwitch": null,
-                    "healthStatus": 3,// health status
-                    "isAdmin": 0//YesNoYes administrator
+                    "healthStatus": 3,//健康状态
+                    "isAdmin": 0//是否是管理员
                 }
             ],
-            "paras": {//
+            "paras": {//入参
                 "id": null,
                 "createTime": null,
                 "updateTime": null,
@@ -1509,65 +1506,65 @@ Response parameters:
     }
  
  
- ####  Get Staff permissions
- Note:
+ ####  获取员工权限 
+ 说明:
      
-     Through this interface, you can obtain the permissions of staffs, so that you can operate the permissions of employees
+     通过此接口,您可以获取员工的权限,从而可以对员工的权限进行操作
  
- Request address:
+ 请求地址:
  
      /third/1.0/employee/role.json
  
- Request method:
+ 请求方式:
  
      POST 
- Request parameters:
+ 请求参数:
  
- Name |	Type |	Required  |	Description
+ 参数名|   类型| 是否必填|   说明
    ---|   ---|    ---|    ---
-   userDid|String|Yes|User did
-   did|String|Yes|Staff did
-   parkId|Long|Yes|Organization id
+   userDid|String|是|用户did
+   did|String|是|员工did
+   parkId|Long|是|组织id
        
- Request example:
- Response parameters:
+ 请求示例:
+ 响应参数:
  
      {
          "code": 0,
          "success": true,
          "msg": "Succeed",
          "data": {
-             "receptionist": 0,//YesNoYesreceptionists(0No,1Yes)
-             "root": 0,//YesNoYeslocation creator(0No,1Yes)
-             "admin": 0//YesNoYes administrator(0No,1Yes)
+             "receptionist": 0,//是否是接待者(0否,1是)
+             "root": 0,//是否是地点创建者(0否,1是)
+             "admin": 0//是否是管理员(0否,1是)
          },
          "map": {}
      }
  
  
- #### Add admin 
+ #### 管理员添加
  
- Note:
+ 说明:
       
-      Through this interface, you can add the designated staff as an administrator, the employee can get more permissions
+      通过此接口,您可以将指定的员工添加为管理员,该员工可以获得更多权限
   
-  Request address:
+  请求地址:
   
      /third/1.0/employee/admin/add.do
   
-  Request method:
+  请求方式:
   
       POST 
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
     ---|   ---|    ---|    ---
-    userDid|String|Yes|User did
-    did|String|Yes|Staff did
-    parkId|Long|Yes|Organization id
+    userDid|String|是|用户did
+    did|String|是|员工did
+    parkId|Long|是|组织id
         
-  Request example:
-  Response parameters:
+  请求示例:
+  响应参数:
   
      {
        "code": 0,
@@ -1578,29 +1575,29 @@ Response parameters:
      }
  
  
- #### Delete administrator 
+ #### 管理员删除
   
-  Note:
+  说明:
        
-       Through this interface, you can remove the administrator rights of designated employees
+       通过此接口,您可以将指定的员工的管理员权限移除
    
-   Request address:
+   请求地址:
    
       /third/1.0/employee/admin/delete.do
    
-   Request method:
+   请求方式:
    
        POST 
-   Request parameters:
+   请求参数:
    
-   Name |	Type |	Required  |	Description
+   参数名|   类型| 是否必填|   说明
      ---|   ---|    ---|    ---
-    userDid|String|Yes|User did
-    did|String|Yes|Staff did
-    parkId|Long|Yes|Organization id
+     userDid|String|是|用户did
+     did|String|是|员工did
+     parkId|Long|是|组织id
          
-   Request example:
-   Response parameters:
+   请求示例:
+   响应参数:
  
     {
       "code": 0,
@@ -1611,29 +1608,29 @@ Response parameters:
     }
  
  
- #### Add receptionist 
+ #### 接待者添加
    
-Note:
+说明:
         
-     Through this interface, you can add the receptionist permission of the designated employee
+     通过此接口,您可以将指定的员工的添加接待者权限
     
-Request address:
+请求地址:
 
     /third/1.0/employee/receptionist/add.do
 
-Request method:
+请求方式:
 
     POST 
-Request parameters:
+请求参数:
 
-Name |	Type |	Required  |	Description
+参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-    userDid|String|Yes|User did
-    did|String|Yes|Staff did
-    parkId|Long|Yes|Organization id
-
-Request example:
-Response parameters:
+  userDid|String|是|用户did
+  did|String|是|员工did
+  parkId|Long|是|组织id
+      
+请求示例:
+响应参数:
 
      {
        "code": 0,
@@ -1644,29 +1641,29 @@ Response parameters:
      }
  
  
- #### Delete receptionist 
+ #### 接待者删除
     
- Note:
+ 说明:
          
-      Through this interface, you can remove the receptionist authority of the designated employee
+      通过此接口,您可以将指定的员工的接待者权限移除
      
- Request address:
+ 请求地址:
  
      /third/1.0/employee/receptionist/delete.do
  
- Request method:
+ 请求方式:
  
      POST 
- Request parameters:
+ 请求参数:
  
- Name |	Type |	Required  |	Description
+ 参数名|   类型| 是否必填|   说明
    ---|   ---|    ---|    ---
-userDid|String|Yes|User did
-did|String|Yes|Employee did
-parkId|Long|Yes|Organization id
+   userDid|String|是|用户did
+   did|String|是|员工did
+   parkId|Long|是|组织id
        
- Request example:
- Response parameters:
+ 请求示例:
+ 响应参数:
  
       {
         "code": 0,
@@ -1677,29 +1674,29 @@ parkId|Long|Yes|Organization id
       }
       
 
-#### Proactively cancel the identity of the receptionist
+#### 自己取消接待者身份
     
- Note:
+ 说明:
          
-      Through this interface, the receptionist can cancel his identity as a receptionist
+      通过此接口,接待者可以取消自己为接待者的身份
      
- Request address:
+ 请求地址:
  
      /third/1.0/employee/receptionist/remove.do
  
- Request method:
+ 请求方式:
  
      POST 
- Request parameters:
+ 请求参数:
  
- Name |	Type |	Required  |	Description
+ 参数名|   类型| 是否必填|   说明
    ---|   ---|    ---|    ---
-userDid|String|Yes|User did
-did|String|Yes|Employee did
-parkId|Long|Yes|Organization id
+   userDid|String|是|用户did
+   did|String|是|员工did
+   parkId|Long|是|组织id
        
- Request example:
- Response parameters:
+ 请求示例:
+ 响应参数:
  
       {
         "code": 0,
@@ -1710,35 +1707,34 @@ parkId|Long|Yes|Organization id
       }
  
  
-###   Appointment related
-####  Save appointment information   
+###   预约相关
+####  保存预约信息     
  
- Note:
+ 说明:
           
-       Through this interface, you can save appointment registration information
+       通过此接口,可以保存预约登记信息
       
- Request address:
+ 请求地址:
   
       /third/1.0/appointment/save.do
   
- Request method:
+ 请求方式:
   
       POST 
- Request parameters:
+ 请求参数:
   
- Name |	Type |	Required  |	Description
+ 参数名|   类型| 是否必填|   说明
     ---|   ---|    ---|    ---
-    name|String|Yes|who made the appoinment
-    email|String|Yes|Contact information
-    appointmentDescribe|String|Yes|apoinment 
-    appointmentType|String|Yes|The appointment type. 1: health code; 2: appointment code; 3; health appointment code
-    appointmentTime|Long|Yes|Date of appointment
-    parkId|Long|Yes|The id of the reservation organization
-    timeZone|String|Yes|Time zone
-    userDid|String|No|The user did, must be Required when the appointment type is 3
-    
+    name|String|是|预约者名字
+    email|String|是|预约者邮箱
+    appointmentDescribe|String|是|拜访事项
+    appointmentType|String|是|预约类型。1：健康码；2：预约码；3；健康预约码
+    appointmentTime|Long|是|预约日期
+    parkId|Long|是|预约组织的id
+    timeZone|String|是|时区
+    userDid|String|否|用户did,当预约类型为3的时候必须传
         
- Request example:
+ 请求示例:
  
         tenantId:Xxxxxx
         timestamp:1591761176173
@@ -1751,7 +1747,7 @@ parkId|Long|Yes|Organization id
         parkId:83
         timeZone:GMT+0800
         
- Response parameters:
+ 响应参数:
         
      {
          "code": 0,
@@ -1762,28 +1758,28 @@ parkId|Long|Yes|Organization id
      }
  
  
- ####  My appointment list    
+ ####  我的预约列表    
 
-Note:
+说明:
        
-    Through this interface, you can get a list of reservation information that has been reserved
+    通过此接口,可以获取已经预约过的预约信息列表
    
-Request address:
+请求地址:
 
     /third/1.0/appointment/myAppointmentPage.json
 
-Request method:
+请求方式:
 
    POST 
-Request parameters:
+请求参数:
 
-Name |	Type |	Required  |	Description
+参数名|   类型| 是否必填|   说明
  ---|   ---|    ---|    ---
- pageNum|Long|Yes|Page number
- pageSize|Long|Yes|Items per page
+ pageNum|Long|是|页码
+ pageSize|Long|是|每页条数
  
      
-Request example:
+请求示例:
 
     tenantId:xxxxxx
     timestamp:1591767713330
@@ -1793,7 +1789,7 @@ Request example:
     pageSize:10
      
      
-Response parameters:
+响应参数:
      
      {
          "code": 0,
@@ -1810,22 +1806,22 @@ Response parameters:
                      "version": null,
                      "tenantId": xxxxxx,
                      "json": "{\"timeZone\":\"GMT+0800\"}",
-                     "appointmentStatus": 7,// appointment status EXAMINE(1, " reviewing"),AGREE(2, " accept"),REFUSE(3, " reject"),END(4, " end"),VERIFY(5, " verified"),DISABLED(6, " unavailable"),CANCELLED(7," cancelled"),
-                     "appointmentType": 3,// appointment type
-                     "appointmentDescribe": "1",// appointment description
-                     "email": "xyyz1207@163.com",// email
+                     "appointmentStatus": 7,//预约状态EXAMINE(1, "审核中"),AGREE(2, "同意"),REFUSE(3, "拒绝"),END(4, "已结束"),VERIFY(5, "已验证"),DISABLED(6, "不可用"),CANCELLED(7,"取消"),
+                     "appointmentType": 3,//预约类型
+                     "appointmentDescribe": "1",//预约描述
+                     "email": "xyyz1207@163.com",//邮箱
                      "healthStatus": null,
-                     "name": "11",// name
-                     "parkId": 46,// appointment OrganizationId
-                     "userId": 72,//userid
-                     "appointmentDate": 1591844460000,// appointment date
+                     "name": "11",//姓名
+                     "parkId": 46,//预约组织Id
+                     "userId": 72,//用户id
+                     "appointmentDate": 1591844460000,//预约日期
                      "startTime": null,
                      "endTime": null,
                      "startTimeLong": null,
                      "endTimeLong": null,
-                     "location": "yongquan road 1013",//address
-                     "parkName": "Shenzhen ",// appointment Organizationname
-                     "coordinates": "22.51427136920438,114.056792087924",//coordinates
+                     "location": "中国广东省深圳市福田区桂花路3号",//地址
+                     "parkName": "Shenzhen ",//预约组织名称
+                     "coordinates": "22.51427136920438,114.056792087924",//坐标
                      "selected": false,
                      "isNotify": false
                  },
@@ -1839,21 +1835,21 @@ Response parameters:
                      "version": null,
                      "tenantId": xxxxx,
                      "json": "{\"timeZone\":\"GMT+0800\"}",
-                     "appointmentStatus": 4,// appointment statusEXAMINE(1, " reviewing"),AGREE(2, " accept"),REFUSE(3, " reject"),END(4, " end"),VERIFY(5, " verified"),DISABLED(6, " unavailable"),CANCELLED(7," cancelled"),
-                     "appointmentType": 3,// appointment type
-                     "appointmentDescribe": "111",// description
-                     "email": "xyyz1207@163.com",// email
+                     "appointmentStatus": 4,//预约状态EXAMINE(1, "审核中"),AGREE(2, "同意"),REFUSE(3, "拒绝"),END(4, "已结束"),VERIFY(5, "已验证"),DISABLED(6, "不可用"),CANCELLED(7,"取消"),
+                     "appointmentType": 3,//预约类型
+                     "appointmentDescribe": "111",//描述
+                     "email": "xyyz1207@163.com",//邮箱
                      "healthStatus": null,
-                     "name": "666",//name
-                     "parkId": 76,// Organizationid
-                     "userId": 72,//userid
+                     "name": "666",//名称
+                     "parkId": 76,//组织id
+                     "userId": 72,//用户id
                      "appointmentDate": 1589014860000,
                      "startTime": null,
                      "endTime": null,
                      "startTimeLong": null,
                      "endTimeLong": null,
-                     "location": "yongquan road 1013",//location
-                     "parkName": "CAT Coffe",// Organizationname
+                     "location": "中国上海市浦东新区祖冲之路",//位置
+                     "parkName": "CAT Coffe hkjd jrjeheue hw ieoei eheu fhdjdjfjfifjgjgkg",//组织名称
                      "coordinates": "31.20646260354803,121.5949145179426",
                      "selected": false,
                      "isNotify": false
@@ -1894,28 +1890,28 @@ Response parameters:
      }
   
  
- ####  Query the details of single appointment    
+ ####  查询单条预约信息详情    
  
- Note:
+ 说明:
         
-     Through this interface, query the details of a single appointment
+     通过此接口,查询单条预约信息详情
     
- Request address:
+ 请求地址:
  
      /third/1.0/appointment/findById.json
  
- Request method:
+ 请求方式:
  
     POST 
- Request parameters:
+ 请求参数:
  
- Name |	Type |	Required  |	Description
+ 参数名|   类型| 是否必填|   说明
   ---|   ---|    ---|    ---
-id|Long|Yes|appointment id
-userDid|String|Yes|user did
+  id|Long|是|预约id
+  userDid|String|是|用户did
   
       
- Request example:
+ 请求示例:
  
      tenantId:xxx
      timestamp:1591769448373
@@ -1924,7 +1920,7 @@ userDid|String|Yes|user did
      id:166
       
       
- Response parameters:
+ 响应参数:
  
     {
         "code": 0,
@@ -1957,28 +1953,28 @@ userDid|String|Yes|user did
     }
  
  
- ####  Cancel the appointment according to the appointment number (can only be cancelled when the appointment has not been reviewed)
+ ####  根据预约编号取消预约(当预约还没有审核时方可取消)   
   
-  Note:
+  说明:
          
-      Through this interface, you can cancel unapproved appointments
+      通过此接口,您可以取消未审核的预约
      
-  Request address:
+  请求地址:
   
       /third/1.0/appointment/cancle.do
   
-  Request method:
+  请求方式:
   
      POST 
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
    ---|   ---|    ---|    ---
-id|Long|Yes|appointment id
-userDid|String|Yes|user did
+   id|Long|是|预约id
+   userDid|String|是|用户did
    
        
-  Request example:
+  请求示例:
   
       tenantId:xxx
       timestamp:1591771010411
@@ -1987,7 +1983,7 @@ userDid|String|Yes|user did
       id:167
        
        
-  Response parameters:
+  响应参数:
  
     {
         "code": 0,
@@ -1998,29 +1994,30 @@ userDid|String|Yes|user did
     }
  
  
-####  Visitor list 
+####  访客列表  
   
-  Note:
+  说明:
          
-      Through this interface, you can get the visitor list to process the visitor's appointment
+      通过此接口,您可以获取访客列表从而对访客的预约进行处理
      
-  Request address:
+  请求地址:
   
       /third/1.0/appointment/visitorPage.json
   
-  Request method:
+  请求方式:
   
      POST 
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
    ---|   ---|    ---|    ---
-   pageNum|Long|Yes|page number
-   pageSize|Long|Yes|items per page
-   parkId|String|Yes|organization (location) id
-   userDid|String|Yes|user did
+   pageNum|Long|是|页码
+   pageSize|Long|是|每页条数
+   parkId|String|是|组织(公司)id
+   userDid|String|是|用户did
+   
        
-  Request example:
+  请求示例:
   
       tenantId:xxxx
       timestamp:1591772889456
@@ -2029,7 +2026,7 @@ userDid|String|Yes|user did
       parkId:56
        
        
-  Response parameters:
+  响应参数:
   
     {
         "code": 0,
@@ -2038,7 +2035,7 @@ userDid|String|Yes|user did
         "data": {
             "list": [
                 {
-                    "id": 96,// appointment list id
+                    "id": 96,//预约列表id
                     "createTime": 1586504608000,
                     "updateTime": 1587073667000,
                     "deleted": false,
@@ -2046,21 +2043,21 @@ userDid|String|Yes|user did
                     "version": null,
                     "tenantId":xxxxx,
                     "json": null,
-                    "appointmentStatus": 4,// appointment status
-                    "appointmentType": 3,// appointment type
-                    "appointmentDescribe": "Testmeeting",// appointment description
+                    "appointmentStatus": 4,//预约状态
+                    "appointmentType": 3,//预约类型
+                    "appointmentDescribe": "Testmeeting",//预约描述
                     "email": null,
-                    "healthStatus": "1",// health status
-                    "name": "Weidong",//name
-                    "parkId": 56,// Organizationid
-                    "userId": 313,//userid
+                    "healthStatus": "1",//健康状态
+                    "name": "Weidong",//名称
+                    "parkId": 56,//组织id
+                    "userId": 313,//用户id
                     "appointmentDate": 1586504580000,
                     "startTime": null,
                     "endTime": null,
                     "startTimeLong": null,
                     "endTimeLong": null,
-                    "location": "No.2966 Jinke Road ,Pudong",//location
-                    "parkName": "Starrymedia2",// appointment Organizationname
+                    "location": "No.2966 Jinke Road ,Pudong",//位置
+                    "parkName": "Starrymedia2",//预约组织名称
                     "coordinates": null,
                     "selected": true,
                     "isNotify": false
@@ -2101,29 +2098,29 @@ userDid|String|Yes|user did
     }
   
  
-####  Appointment review (accept or reject appointment) 
+####  预约审核(通过或者拒绝预约)   
   
-  Note:
+  说明:
          
-      Through this interface, you can review the visit appointment events
+      通过此接口,您可以对来访的预约事件进行审核
      
-  Request address:
+  请求地址:
   
       /third/1.0/appointment/examine.do
   
-  Request method:
+  请求方式:
   
      POST 
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
    ---|   ---|    ---|    ---
-appointmentId|Long|Yes|reservation id
-examine|Boolean|Yes|review results
-userDid|String|Yes|user did
+   appointmentId|Long|是|预约表id
+   examine|Boolean|是|审核结果
+   userDid|String|是|用户did
    
        
-  Request example:
+  请求示例:
   
       tenantId:xxxx
       timestamp:1591771562423
@@ -2133,7 +2130,7 @@ userDid|String|Yes|user did
       examine:1
        
        
-  Response parameters:
+  响应参数:
  
     {
         "code": 0,
@@ -2145,28 +2142,28 @@ userDid|String|Yes|user did
     
     
     
-####  Get schedule information for a specified month 
+####  获取指定月份的日程信息  
   
-  Note:
+  说明:
          
-      Through this interface, you can get all the schedule information under the specified month
+      通过此接口,您可以获取指定月份下的所有日程信息
      
-  Request address:
+  请求地址:
   
       /third/1.0/appointment/myscheduleinfo.json
   
-  Request method:
+  请求方式:
   
      POST 
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
    ---|   ---|    ---|    ---
-   time|String|Yes|Date
-   userDid|String|Yes|User did
+   time|String|是|日期
+   userDid|String|是|用户did
    
        
-  Request example:
+  请求示例:
   
       tenantId:xxxx
       timestamp:1591773828477
@@ -2176,7 +2173,7 @@ userDid|String|Yes|user did
 
        
        
-  Response parameters:
+  响应参数:
  
     {
         "code": 0,
@@ -2194,15 +2191,15 @@ userDid|String|Yes|user did
                 "json": null,
                 "userId": null,
                 "name": null,
-                "purpose": "111",// appointment purpose
+                "purpose": "111",//预约目的
                 "addressName": null,
                 "location": null,
                 "time": 1591844460000,
-                "appointmentStatus": 2,// appointment status
-                "appointmentType": 1,// appointment type
+                "appointmentStatus": 2,//预约状态
+                "appointmentType": 1,//预约类型
                 "conditionType": null,
                 "parkIdsSet": null,
-                "type": "1",//When tpye is 1Yes, Yes means someone else came to visit me 2 when I was going to visit someone
+                "type": "1",//当tpye为1是指的是别人来拜访我 2时我要去拜访别人
                 "conditionTime": null
             }
         ],
@@ -2210,30 +2207,30 @@ userDid|String|Yes|user did
     }
  
  
- ####  Get schedule information of a specific day  
+ ####  获取指定一天的日程信息  
    
-   Note:
+   说明:
           
-       Through this interface, you can get the schedule information of a specific day
+       通过此接口,您可以获取指定某一天的日程信息
       
-   Request address:
+   请求地址:
    
        /third/1.0/appointment/myschedule.json
    
-   Request method:
+   请求方式:
    
       POST 
-   Request parameters:
+   请求参数:
    
-   Name |	Type |	Required  |	Description
+   参数名|   类型| 是否必填|   说明
     ---|   ---|    ---|    ---
-pageNum|Long|Yes|page number
-pageSize|Long|Yes|items per page
-time|String|Yes|date
-userDid|String|Yes|user did
+    pageNum|Long|是|页码
+    pageSize|Long|是|每页条数
+    time|String|是|日期
+    userDid|String|是|用户did
     
         
-   Request example:
+   请求示例:
    
        tenantId:xxxx
        timestamp:1591773828477
@@ -2245,7 +2242,7 @@ userDid|String|Yes|user did
  
         
         
-   Response parameters:
+   响应参数:
     
     {
         "code": 0,
@@ -2271,7 +2268,7 @@ userDid|String|Yes|user did
                 "appointmentType": 1,
                 "conditionType": null,
                 "parkIdsSet": null,
-                "type": "1",//访问 type
+                "type": "1",//访问类型
                 "conditionTime": null
             }, {
                 "id": null,
@@ -2292,7 +2289,7 @@ userDid|String|Yes|user did
                 "appointmentType": 1,
                 "conditionType": null,
                 "parkIdsSet": null,
-                "type": "2",// schedule type
+                "type": "2",//日程类型
                 "conditionTime": null
             }],
             "paras": {
@@ -2310,31 +2307,30 @@ userDid|String|Yes|user did
     }
     
     
- ###  Group function
- ####   Create Group
- Note:
+ ###  群组功能
+ ####   创建群
+ 说明:
         
-    Through this interface, you can create your own group
-        
- Request address:
+        通过此接口,您可以创建属于自己的群组
+ 请求地址:
  
     /third/1.0/group/create
- Request method:
+ 请求方式:
  
     POST 
- Request parameters:
+ 请求参数:
  
- Name |	Type |	Required  |	Description
+ 参数名|   类型| 是否必填|   说明
      ---|   ---|    ---|    ---
-name|String|Yes|Group name
-picture|String|Yes|Address of group picture 
-notice|String|No|Group announcement
-status|Integer|Yes|YesNo reveals the group (0 not public, 1 public)
-applyType|Integer|Yes|Audit type (0 not audit, 1 audit)
-userDid|String|Yes|user did
+     name|String|是|群组名称
+     picture|String|是|群组图片地址
+     notice|String|否|群公告
+     status|Integer|是|是否公开该群(0不公开,1公开)
+     applyType|Integer|是|审核类型(0不审核,1审核)
+     userDid|String|是|用户did
      
- Request example:
- Result Response:
+ 请求示例:
+ 响应结果:
  
     {
       "code": 0,
@@ -2345,32 +2341,30 @@ userDid|String|Yes|user did
     }
  
  
-  ####   Edit Group
-  Note:
+  ####   编辑群
+  说明:
          
-    Through this interface, you can edit the group you created
-         
-  Request address:
+         通过此接口,您可以编辑自己创建的群组
+  请求地址:
   
      /third/1.0/group/edit
-     
-  Request method:
+  请求方式:
   
      POST 
-  Request parameters:
+  请求参数:
   
-  Name |	Type |	Required  |	Description
+  参数名|   类型| 是否必填|   说明
       ---|   ---|    ---|    ---
-number|String|Yes|Group number
-name|String|Yes|Group name
-picture|String|Yes|Address of group picture 
-notice|String|No|Group announcement
-status|Integer|Yes|YesNo reveals the group (0 not public, 1 public)
-applyType|Integer|Yes|Audit type (0 not audit, 1 audit)
-userDid|String|Yes|user did
+      number|String|是|群编号
+      name|String|是|群组名称
+      picture|String|是|群组图片地址
+      notice|String|否|群公告
+      status|Integer|是|是否公开该群(0不公开,1公开)
+      applyType|Integer|是|审核类型(0不审核,1审核)
+      userDid|String|是|用户did
       
-  Request example:
-  Result Response:
+  请求示例:
+  响应结果:
  
     {
       "code": 0,
@@ -2381,33 +2375,31 @@ userDid|String|Yes|user did
     }
  
  
- ####   Get group information based on group id
-   Note:
+ ####   根据群id获取群信息
+   说明:
           
-          Through this interface, you can obtain single group information to edit the group information
-          
-   Request address:
+          通过此接口,您可以获取单个群信息从而对群信息进行编辑
+   请求地址:
    
       /third/1.0/group/info
-      
-   Request method:
+   请求方式:
    
       GET 
-   Request parameters:
+   请求参数:
    
-   Name |	Type |	Required  |	Description
+   参数名|   类型| 是否必填|   说明
        ---|   ---|    ---|    ---
-       groupId|String|Yes|group id
-       userDid|String|Yes|user did
+       groupId|String|是|群组id
+       userDid|String|是|用户did
        
-   Request example:
+   请求示例:
    
     tenantId:xxx
     timestamp:1591843116577
     sign:59d2ce391aa8da9110b635cfe080a8bda7895dbb192116eb128563e09460f3b5
     userDid:ihsRJhHzUPnnFxxxxxxxxS4ASipFqB
     groupId:15
-   Result Response:
+   响应结果:
  
     {
         "code": 0,
@@ -2424,40 +2416,39 @@ userDid|String|Yes|user did
             "json": null,
             "applyType": 1,
             "status": 1,
-            "leaderDid": "ihsRJhHzUPnxxxxxxBS4ASipFqB",// groupdid
-            "leaderUserId": 72,// groupuserid
-            "name": " ellie's group ",// group name
-            "notice": "1s",// group slogan
-            "number": "345244564",// group id
-            "picture": "{url}",// group picture
-            "totalScore": 0.00// group points
+            "leaderDid": "ihsRJhHzUPnxxxxxxBS4ASipFqB",//群组did
+            "leaderUserId": 72,//群组用户id
+            "name": "鲜鲜创建的",//群名
+            "notice": "1s",//群口号
+            "number": "345244564",//群号
+            "picture": "{url}",//群图片
+            "totalScore": 0.00//群积分
         },
         "map": {}
     }
     
     
-####   Get group list
-   Note:
+####   获取群列表
+   说明:
           
-          Through this interface, you can get the group list
-          
-   Request address:
+          通过此接口,您可以获取群列表
+   请求地址:
    
       /third/1.0/group/index
-   Request method:
+   请求方式:
    
       POST 
-   Request parameters:
+   请求参数:
    
-   Name |	Type |	Required  |	Description
+   参数名|   类型| 是否必填|   说明
        ---|   ---|    ---|    ---
-       isAll|Integer|No|YesNoShow all groups (0 shows all 1 shows groups created by yourself)
-       pageNum|Integer|Yes|page number
-       pageSize|Integer|Yes|items per page
-       lastCheckTime|String|Yes|last viewed time
-       userDid|String|Yes|user did
+       isAll|Integer|否|是否显示所有群组(0显示全部1显示自己创建的群组)
+       pageNum|Integer|是|页码
+       pageSize|Integer|是|每页条数
+       lastCheckTime|String|是|最后查看时间
+       userDid|String|是|用户did
        
-   Request example:
+   请求示例:
    
     tenantId:xxxxx
     timestamp:1591844245602
@@ -2467,7 +2458,7 @@ userDid|String|Yes|user did
     pageNum:1
     pageSize:10
     lastCheckTime:0
-   Result Response:
+   响应结果:
  
     {
         "code": 0,
@@ -2476,23 +2467,23 @@ userDid|String|Yes|user did
         "data": {
             "list": [
                 {
-                    "groupNumber": "345244564",// group number
-                    "groupName": " ellie's group ",// group name
+                    "groupNumber": "345244564",//群编号
+                    "groupName": "鲜鲜创建的",//群名称
                     "groupPicture": "{url}",
-                    "groupNotice": "1s",// group slogan
-                    "groupLeaderDid": "ihsRJhHzUPxxxxxv1BS4ASipFqB",// group creator did
-                    "groupLeaderUid": 72,// groupuserId
-                    "groupScore": 0,// group points
-                    "groupHealthStatus": 1,// group  health status
-                    "groupHealthValue": 100.0000,// group health 
-                    "rank": 1,// ranks
+                    "groupNotice": "1s",//群口号
+                    "groupLeaderDid": "ihsRJhHzUPxxxxxv1BS4ASipFqB",//群主did
+                    "groupLeaderUid": 72,//群组用户Id
+                    "groupScore": 0,//群积分
+                    "groupHealthStatus": 1,//群健康状态
+                    "groupHealthValue": 100.0000,//群健康度
+                    "rank": 1,//排名
                     "totalGroup": 9,
                     "normalMember": 2,
                     "abnormalMember": 0,
                     "undetectedMember": 0,
                     "applySum": 0,
-                    "status": 1,// status
-                    "normalHealthTime": 54900,// health duration
+                    "status": 1,//状态
+                    "normalHealthTime": 54900,//健康保持时间
                     "undetectedHealthTime": 0,
                     "memberList": null,
                     "isBelong": 1
@@ -2512,27 +2503,26 @@ userDid|String|Yes|user did
     
     
     
-####   Get group member information
-   Note:
+####   获取群成员信息
+   说明:
           
-          Through this interface, you can get group member information
-          
-   Request address:
+          通过此接口,您可以获取群成员信息
+   请求地址:
    
       /third/1.0/group/detail
-   Request method:
+   请求方式:
    
       GET
-   Request parameters:
+   请求参数:
    
-   Name |	Type |	Required  |	Description
+   参数名|   类型| 是否必填|   说明
        ---|   ---|    ---|    ---
-       groupNumber|String|Yes|group number
-       pageNum| Integer|Yes|page
-       pageSize|Integer|Yes|items per page
-       userDid|String|Yes|user did
+       groupNumber|String|是|群number
+       pageNum| Integer|是|页码
+       pageSize|Integer|是|每页个数
+       userDid|String|是|用户did
        
-   Request example:
+   请求示例:
    
     timestamp:1591845427619
     sign:06388a91f1780e59102c6466a17c2dddd63df137731e34a8a451b617d4e28a77
@@ -2541,7 +2531,7 @@ userDid|String|Yes|user did
     tenantId:xxxx
     pageNum:1
     pageSize:10
-   Result Response:
+   响应结果:
  
     {
         "code": 0,
@@ -2552,7 +2542,7 @@ userDid|String|Yes|user did
                 {
                     "did": "ihsRJhHzUPnxxxxxxDv1BS4ASipFqB",
                     "uid": 72,
-                    "userName": " Fred",
+                    "userName": "哈哈哈哈哈哈",
                     "userPhoto": "{url}",
                     "healthStatus": 1,
                     "pushTimeStamp": 1591788480000,
@@ -2579,7 +2569,7 @@ userDid|String|Yes|user did
                 {
                     "did": "iYebypjpJtHxxxxxxxReZEbCYqqXa",
                     "uid": 333,
-                    "userName": " Fred",
+                    "userName": "周鲜鲜新号",
                     "userPhoto": null,
                     "healthStatus": 3,
                     "pushTimeStamp": null,
@@ -2599,27 +2589,26 @@ userDid|String|Yes|user did
     }
     
     
-####   Get the group audit list
-   Note:
+####   获取入群审核列表
+   说明:
           
-          Through this interface, you can pull the application list
-          
-   Request address:
+          通过此接口,您可以拉去申请入群的列表
+   请求地址:
    
       /third/1.0/group/list
-   Request method:
+   请求方式:
    
       GET 
-   Request parameters:
+   请求参数:
    
-   Name |	Type |	Required  |	Description
+   参数名|   类型| 是否必填|   说明
        ---|   ---|    ---|    ---
-       groupNumber|String|Yes|group number
-       pageNum| Integer|Yes|page
-       pageSize|Integer|Yes|items per page
-       userDid|String|Yes|user did
+       groupNumber|String|是|群number
+       pageNum| Integer|是|页码
+       pageSize|Integer|是|每页个数
+       userDid|String|是|用户did
        
-   Request example:
+   请求示例:
    
     timestamp:1591845427619
     sign:06388a91f1780e59102c6466a17c2dddd63df137731e34a8a451b617d4e28a77
@@ -2628,7 +2617,7 @@ userDid|String|Yes|user did
     tenantId:xxxx
     pageNum:1
     pageSize:10
-   Result Response:
+   响应结果:
  
     {
       "code": 0,
@@ -2639,16 +2628,16 @@ userDid|String|Yes|user did
           {
             "createTime": "2020-06-11T02:03:29.174Z",
             "deleted": false,
-            "groupNumber": "string",// group  number
-            "healthStatus": 0,// applicant health status(0 health1 Hyperthermia2 Not detected)
+            "groupNumber": "string",//群编号
+            "healthStatus": 0,//申请者健康状态(0健康1体温高2未检测)
             "id": 0,
-            "inviterDid": "string",// inviter did
-            "inviterType": 0,// invite type
+            "inviterDid": "string",//邀请者did
+            "inviterType": 0,//邀请类型
             "json": "string",
-            "memberDid": "string",//member did
-            "nickName": "string",// nickname
+            "memberDid": "string",//成员did
+            "nickName": "string",//别名
             "photo": "string",
-            "remark": "string",// note
+            "remark": "string",//备注
             "status": 0,
             "tenantId": 0,
             "updateTime": "2020-06-11T02:03:29.174Z",
@@ -2669,28 +2658,27 @@ userDid|String|Yes|user did
     }
     
     
-####   Group audit
-   Note:
+####   入群审核
+   说明:
           
-          Through this interface, you can approve the application for joining the group
-          
-   Request address:
+          通过此接口,您可以对入群的申请进行审批
+   请求地址:
    
       /third/1.0/group/apply
-   Request method:
+   请求方式:
    
       GET 
-   Request parameters:
+   请求参数:
    
-   Name |	Type |	Required  |	Description
+   参数名|   类型| 是否必填|   说明
        ---|   ---|    ---|    ---
-       groupNumber|String|Yes|group number
-       inviteLogId| Long|Yes|page number
-       status|Integer|Yes|Audit status (0: reject, 1: accept)
-       userDid|String|Yes|user did
+       groupNumber|String|是|群number
+       inviteLogId| Long|是|页码
+       status|Integer|是|审核状态（0：不同意，1：同意）
+       userDid|String|是|用户did
        
-   Request example:
-   Result Response:
+   请求示例:
+   响应结果:
  
     {
       "code": 0,
