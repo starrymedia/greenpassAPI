@@ -2452,11 +2452,11 @@ userDid|String|Yes|user did
    
  Name |	Type |	Required  |	Description
 ---|   ---|    ---|    ---
- isAll|Integer|No|YesNoShow all groups (0 shows all 1 shows groups created by yourself)
-       pageNum|Integer|Yes|page number
-       pageSize|Integer|Yes|items per page
-       lastCheckTime|String|Yes|last viewed time
-       userDid|String|Yes|user did
+ isAll | Integer | No | YesNoShow all groups (0 shows all 1 shows groups created by yourself)
+pageNum | Integer | Yes | page number
+pageSize | Integer | Yes | items per page
+lastCheckTime | String | Yes | last viewed time
+userDid | String | Yes | user did
        
    Request example:
    
@@ -2528,10 +2528,10 @@ userDid|String|Yes|user did
    
 Name |	Type |	Required  |	Description
 ---|   ---|    ---|    ---
-       groupNumber|String|Yes|group number
-       pageNum| Integer|Yes|page
-       pageSize|Integer|Yes|items per page
-       userDid|String|Yes|user did
+groupNumber | String | Yes | group number
+pageNum | Integer | Yes | page
+pageSize | Integer | Yes | items per page
+userDid | String | Yes | user did
        
    Request example:
    
@@ -2615,10 +2615,10 @@ Name |	Type |	Required  |	Description
    
 Name |	Type |	Required  |	Description
 ---|   ---|    ---|    ---
-       groupNumber|String|Yes|group number
-       pageNum| Integer|Yes|page
-       pageSize|Integer|Yes|items per page
-       userDid|String|Yes|user did
+groupNumber |String | Yes | group number
+pageNum | Integer | Yes | page
+pageSize | Integer | Yes | items per page
+userDid |String | Yes | user did
        
    Request example:
    
@@ -2685,10 +2685,10 @@ Name |	Type |	Required  |	Description
    
 Name |	Type |	Required  |	Description
 ---|   ---|    ---|    ---
-       groupNumber|String|Yes|group number
-       inviteLogId| Long|Yes|page number
-       status|Integer|Yes|Audit status (0: reject, 1: accept)
-       userDid|String|Yes|user did
+groupNumber|String|Yes|group number
+inviteLogId| Long|Yes|page number
+status|Integer|Yes|Audit status (0: reject, 1: accept)
+userDid | String|Yes|user did
        
    Request example:
    Result Response:
