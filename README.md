@@ -2225,10 +2225,8 @@ userDid|String|Yes|user did
       POST 
    Request parameters:
    
-Name |Type |	Required  |Description
-
+Name |	Type |	Required  |	Description
 ---|   ---|    ---|    ---
-
 pageNum|Long|Yes|page number
 pageSize|Long|Yes|items per page
 time|String|Yes|date
@@ -2327,14 +2325,15 @@ userDid|String|Yes|user did
  Request parameters:
  
  Name |	Type |	Required  |	Description
-     ---|   ---|    ---|    ---
+ ---|   ---|    ---|    ---
 name|String|Yes|Group name
 picture|String|Yes|Address of group picture 
 notice|String|No|Group announcement
 status|Integer|Yes|YesNo reveals the group (0 not public, 1 public)
 applyType|Integer|Yes|Audit type (0 not audit, 1 audit)
 userDid|String|Yes|user did
-     
+
+
  Request example:
  Result Response:
  
