@@ -2360,8 +2360,8 @@ userDid|String|Yes|user did
      POST 
   Request parameters:
   
-  Name |	Type |	Required  |	Description
-      ---|   ---|    ---|    ---
+Name |	Type |	Required  |	Description
+ ---|   ---|    ---|    ---
 number|String|Yes|Group number
 name|String|Yes|Group name
 picture|String|Yes|Address of group picture 
@@ -2396,10 +2396,10 @@ userDid|String|Yes|user did
       GET 
    Request parameters:
    
-   Name |	Type |	Required  |	Description
-       ---|   ---|    ---|    ---
-       groupId|String|Yes|group id
-       userDid|String|Yes|user did
+ Name |	Type |	Required  |	Description
+---|   ---|    ---|    ---
+groupId|String|Yes|group id
+userDid|String|Yes|user did
        
    Request example:
    
@@ -2450,9 +2450,9 @@ userDid|String|Yes|user did
       POST 
    Request parameters:
    
-   Name |	Type |	Required  |	Description
-       ---|   ---|    ---|    ---
-       isAll|Integer|No|YesNoShow all groups (0 shows all 1 shows groups created by yourself)
+ Name |	Type |	Required  |	Description
+---|   ---|    ---|    ---
+ isAll|Integer|No|YesNoShow all groups (0 shows all 1 shows groups created by yourself)
        pageNum|Integer|Yes|page number
        pageSize|Integer|Yes|items per page
        lastCheckTime|String|Yes|last viewed time
@@ -2527,7 +2527,7 @@ userDid|String|Yes|user did
    Request parameters:
    
    Name |	Type |	Required  |	Description
-       ---|   ---|    ---|    ---
+ ---|   ---|    ---|    ---
        groupNumber|String|Yes|group number
        pageNum| Integer|Yes|page
        pageSize|Integer|Yes|items per page
@@ -2614,7 +2614,7 @@ userDid|String|Yes|user did
    Request parameters:
    
    Name |	Type |	Required  |	Description
-       ---|   ---|    ---|    ---
+   ---|   ---|    ---|    ---
        groupNumber|String|Yes|group number
        pageNum| Integer|Yes|page
        pageSize|Integer|Yes|items per page
@@ -2684,7 +2684,7 @@ userDid|String|Yes|user did
    Request parameters:
    
    Name |	Type |	Required  |	Description
-       ---|   ---|    ---|    ---
+ ---|   ---|    ---|    ---
        groupNumber|String|Yes|group number
        inviteLogId| Long|Yes|page number
        status|Integer|Yes|Audit status (0: reject, 1: accept)
