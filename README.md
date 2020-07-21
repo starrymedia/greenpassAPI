@@ -2225,8 +2225,10 @@ userDid|String|Yes|user did
       POST 
    Request parameters:
    
-   Name |	Type |	Required  |	Description
-    ---|   ---|    ---|    ---
+Name |Type |	Required  |Description
+
+---|   ---|    ---|    ---
+
 pageNum|Long|Yes|page number
 pageSize|Long|Yes|items per page
 time|String|Yes|date
