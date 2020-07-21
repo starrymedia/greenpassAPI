@@ -2526,8 +2526,8 @@ userDid|String|Yes|user did
       GET
    Request parameters:
    
-   Name |	Type |	Required  |	Description
- ---|   ---|    ---|    ---
+Name |	Type |	Required  |	Description
+---|   ---|    ---|    ---
        groupNumber|String|Yes|group number
        pageNum| Integer|Yes|page
        pageSize|Integer|Yes|items per page
@@ -2613,8 +2613,8 @@ userDid|String|Yes|user did
       GET 
    Request parameters:
    
-   Name |	Type |	Required  |	Description
-   ---|   ---|    ---|    ---
+Name |	Type |	Required  |	Description
+---|   ---|    ---|    ---
        groupNumber|String|Yes|group number
        pageNum| Integer|Yes|page
        pageSize|Integer|Yes|items per page
@@ -2683,8 +2683,8 @@ userDid|String|Yes|user did
       GET 
    Request parameters:
    
-   Name |	Type |	Required  |	Description
- ---|   ---|    ---|    ---
+Name |	Type |	Required  |	Description
+---|   ---|    ---|    ---
        groupNumber|String|Yes|group number
        inviteLogId| Long|Yes|page number
        status|Integer|Yes|Audit status (0: reject, 1: accept)
